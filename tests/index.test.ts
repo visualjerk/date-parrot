@@ -1,5 +1,5 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
-import { nextFriday, setMonth, setDate, addYears, formatISO } from 'date-fns'
+import { nextMonday, setMonth, setDate, addYears, formatISO } from 'date-fns'
 import { DayOfWeek, Month, parse, ParseResult } from '../src/parse'
 
 const TODAY = new Date('2022-02-04')
@@ -143,12 +143,28 @@ const TEST_CASES: [string, ParseResult | null][] = [
       schedule: {
         repeatFrequency: 'P1W',
         byDay: DayOfWeek.Friday,
-        startDate: formatISO(nextFriday(TODAY)),
+        // today is a firday
+        startDate: TODAY_AS_ISO,
       },
       match: {
         index: 0,
         length: 12,
         text: 'every friday',
+      },
+    },
+  ],
+  [
+    'every monday',
+    {
+      schedule: {
+        repeatFrequency: 'P1W',
+        byDay: DayOfWeek.Monday,
+        startDate: formatISO(nextMonday(TODAY)),
+      },
+      match: {
+        index: 0,
+        length: 12,
+        text: 'every monday',
       },
     },
   ],

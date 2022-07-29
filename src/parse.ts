@@ -1,36 +1,21 @@
 import {
-  nextMonday,
-  nextTuesday,
-  nextWednesday,
-  nextThursday,
-  nextFriday,
-  nextSaturday,
-  nextSunday,
+  setDay,
   setDate,
   setMonth,
+  addWeeks,
   addYears,
   isPast,
   formatISO,
 } from 'date-fns'
 
 export enum DayOfWeek {
-  Monday = 1,
+  Sunday,
+  Monday,
   Tuesday,
   Wednesday,
   Thursday,
   Friday,
   Saturday,
-  Sunday,
-}
-
-const dayOfWeekFunctions: Record<DayOfWeek, (date: Date) => Date> = {
-  [DayOfWeek.Monday]: nextMonday,
-  [DayOfWeek.Tuesday]: nextTuesday,
-  [DayOfWeek.Wednesday]: nextWednesday,
-  [DayOfWeek.Thursday]: nextThursday,
-  [DayOfWeek.Friday]: nextFriday,
-  [DayOfWeek.Saturday]: nextSaturday,
-  [DayOfWeek.Sunday]: nextSunday,
 }
 
 export enum Month {
@@ -139,7 +124,10 @@ export function parse(input: string): ParseResult | null {
       if (match && match[0]) {
         repeatFrequency = `${repeatFrequency}W`
         byDay = value as DayOfWeek
-        startDate = dayOfWeekFunctions[value as DayOfWeek](startDate)
+        startDate = setDay(startDate, byDay, { weekStartsOn: 1 })
+        if (isPast(startDate)) {
+          startDate = addWeeks(startDate, 1)
+        }
         if (match[0].at(-1) === ' ') {
           match[0] = match[0].trimEnd()
         }
