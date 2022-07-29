@@ -8,6 +8,7 @@ const TEST_CASES: [string, ParseResult | null][] = [
   ['everyday', null],
   ['every secondday', null],
   ['everysecond day', null],
+  ['every once in a while a second day', null],
   [
     'every day',
     {

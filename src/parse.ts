@@ -47,14 +47,17 @@ export function parse(input: string): ParseResult | null {
   let index = 0
   let text = ''
   SCHEDULE_TRIGGER_WORDS.some((word) => {
-    const match = input.match(new RegExp(`^${word} | ${word} `))
+    const match = input.match(new RegExp(`^${word} +| ${word} +`))
     if (match && match[0]) {
       scheduleTriggerMatch = match
-      text = match[0].trim()
       index = match.index || 0
       if (match[0].at(0) === ' ') {
         index++
+        match[0] = match[0].trimStart()
       }
+
+      text = match[0]
+      input = input.slice(index + match[0].length)
       return true
     }
     return false
@@ -64,10 +67,11 @@ export function parse(input: string): ParseResult | null {
   }
 
   const enumWordMatch = ENUM_WORDS.some(([word, value]) => {
-    const match = input.match(new RegExp(` ${word} `))
+    const match = input.match(new RegExp(`^${word} +`))
     if (match && match[0]) {
       repeatFrequency = `P${value}`
-      text = `${text} ${match[0].trim()}`
+      text = `${text}${match[0]}`
+      input = input.slice(match[0].length)
       return true
     }
     return false
@@ -77,10 +81,13 @@ export function parse(input: string): ParseResult | null {
   }
 
   const unitWordMatch = UNIT_WORDS.some(([word, unit]) => {
-    const match = input.match(new RegExp(` ${word}$| ${word} `))
+    const match = input.match(new RegExp(`^${word}$|^${word} `))
     if (match && match[0]) {
       repeatFrequency = `${repeatFrequency}${unit}`
-      text = `${text} ${match[0].trim()}`
+      if (match[0].at(-1) === ' ') {
+        match[0] = match[0].trimEnd()
+      }
+      text = `${text}${match[0]}`
       return true
     }
     return false
