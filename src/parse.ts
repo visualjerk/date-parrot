@@ -1,5 +1,5 @@
 export enum DayOfWeek {
-  Monday,
+  Monday = 1,
   Tuesday,
   Wednesday,
   Thursday,
@@ -8,13 +8,28 @@ export enum DayOfWeek {
   Sunday,
 }
 
+export enum Month {
+  January = 1,
+  February,
+  March,
+  April,
+  May,
+  June,
+  July,
+  August,
+  September,
+  October,
+  November,
+  December,
+}
+
 /**
  * https://schema.org/Schedule
  */
 export interface ParseResult {
   schedule: {
     byDay?: DayOfWeek
-    byMonth?: number
+    byMonth?: Month
     byMonthDay?: number
     byMonthWeek?: number
     repeatFrequency: string
@@ -45,6 +60,9 @@ export function parse(input: string): ParseResult | null {
 
   let index = 0
   let text = ''
+  let byDay: DayOfWeek | undefined
+  let byMonth: Month | undefined
+
   const scheduleTriggerMatch = SCHEDULE_TRIGGER_WORDS.some((word) => {
     const match = input.match(new RegExp(`^${word} +| ${word} +`))
     if (match && match[0]) {
@@ -53,7 +71,6 @@ export function parse(input: string): ParseResult | null {
         index++
         match[0] = match[0].trimStart()
       }
-
       text = match[0]
       input = input.slice(index + match[0].length)
       return true
@@ -91,7 +108,37 @@ export function parse(input: string): ParseResult | null {
     return false
   })
   if (!unitWordMatch) {
-    return null
+    const weekDayMatch = Object.entries(DayOfWeek).some(([day, value]) => {
+      const match = input.match(new RegExp(`^${day}$|^${day} `, 'i'))
+      if (match && match[0]) {
+        repeatFrequency = `${repeatFrequency}W`
+        byDay = value as DayOfWeek
+        if (match[0].at(-1) === ' ') {
+          match[0] = match[0].trimEnd()
+        }
+        text = `${text}${match[0]}`
+        return true
+      }
+      return false
+    })
+    if (!weekDayMatch) {
+      const monthMatch = Object.entries(Month).some(([name, value]) => {
+        const match = input.match(new RegExp(`^${name}$|^${name} `, 'i'))
+        if (match && match[0]) {
+          repeatFrequency = `${repeatFrequency}Y`
+          byMonth = value as Month
+          if (match[0].at(-1) === ' ') {
+            match[0] = match[0].trimEnd()
+          }
+          text = `${text}${match[0]}`
+          return true
+        }
+        return false
+      })
+      if (!monthMatch) {
+        return null
+      }
+    }
   }
 
   if (!repeatFrequency) {
@@ -102,6 +149,8 @@ export function parse(input: string): ParseResult | null {
     schedule: {
       repeatFrequency,
       startDate: new Date('2022-01-01').toISOString(),
+      byDay,
+      byMonth,
     },
     match: {
       index,

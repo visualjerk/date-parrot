@@ -1,5 +1,5 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
-import { parse, ParseResult } from '../src/parse'
+import { DayOfWeek, Month, parse, ParseResult } from '../src/parse'
 
 const TODAY = new Date('2022-01-01')
 const TEST_CASES: [string, ParseResult | null][] = [
@@ -90,6 +90,38 @@ const TEST_CASES: [string, ParseResult | null][] = [
         index: 3,
         length: 17,
         text: 'every second week',
+      },
+    },
+  ],
+  [
+    'every friday',
+    {
+      schedule: {
+        repeatFrequency: 'P1W',
+        byDay: DayOfWeek.Friday,
+        // TODO: needs to be next friday
+        startDate: TODAY.toISOString(),
+      },
+      match: {
+        index: 0,
+        length: 12,
+        text: 'every friday',
+      },
+    },
+  ],
+  [
+    'every june',
+    {
+      schedule: {
+        repeatFrequency: 'P1Y',
+        byMonth: Month.June,
+        // TODO: needs to the 1st of june
+        startDate: TODAY.toISOString(),
+      },
+      match: {
+        index: 0,
+        length: 10,
+        text: 'every june',
       },
     },
   ],
