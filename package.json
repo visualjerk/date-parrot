@@ -1,12 +1,20 @@
 {
   "name": "morgen",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/morgen.umd.cjs",
+  "module": "./dist/morgen.js",
+  "exports": {
+    ".": {
+      "import": "./dist/morgen.js",
+      "require": "./distmorgen.umd.cjs"
+    }
+  },
   "scripts": {
-    "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview",
     "test": "vitest"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
 import { nextMonday, setMonth, setDate, addYears, formatISO } from 'date-fns'
-import { DayOfWeek, Month, parse, ParseResult } from '../src/parse'
+import { DayOfWeek, Month, parse, ParseResult } from '../lib/parse'
 
 const TODAY = new Date('2022-02-04')
 const TODAY_AS_ISO = formatISO(TODAY)
@@ -239,7 +239,7 @@ describe('parse', () => {
   ]
 
   it.each(TEST_CASES)('parses "%s"', (input, output) => {
-    expect(parse(input)).toEqual(output)
+    expect(parse(input as string)).toEqual(output)
   })
 
   describe('triggers', () => {
