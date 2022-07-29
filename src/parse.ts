@@ -114,8 +114,10 @@ const UNIT_WORDS: STRING_DEF[] = [
 ]
 
 export function parse(input: string): ParseResult | null {
+  if (!input) {
+    return null
+  }
   let repeatFrequency: string | undefined
-
   let index = 0
   let text = ''
   let byDay: DayOfWeek | undefined

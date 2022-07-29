@@ -10,7 +10,8 @@ describe('parse', () => {
     vi.useFakeTimers().setSystemTime(TODAY)
   })
 
-  const TEST_CASES: [string, ParseResult | null][] = [
+  const TEST_CASES: [string | null, ParseResult | null][] = [
+    [null, null],
     ['', null],
     ['hello', null],
     ['everyday', null],
@@ -160,6 +161,22 @@ describe('parse', () => {
       },
     ],
     [
+      'every 2nd friday',
+      {
+        schedule: {
+          repeatFrequency: 'P2W',
+          byDay: DayOfWeek.Friday,
+          // today is a firday
+          startDate: TODAY_AS_ISO,
+        },
+        match: {
+          index: 0,
+          length: 16,
+          text: 'every 2nd friday',
+        },
+      },
+    ],
+    [
       'every monday',
       {
         schedule: {
@@ -186,6 +203,21 @@ describe('parse', () => {
           index: 0,
           length: 10,
           text: 'every june',
+        },
+      },
+    ],
+    [
+      'every 2nd june',
+      {
+        schedule: {
+          repeatFrequency: 'P2Y',
+          byMonth: Month.June,
+          startDate: formatISO(setDate(setMonth(TODAY, 5), 1)),
+        },
+        match: {
+          index: 0,
+          length: 14,
+          text: 'every 2nd june',
         },
       },
     ],
