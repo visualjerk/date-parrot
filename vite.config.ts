@@ -6,7 +6,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'lib/index.ts'),
       name: 'morgen.js',
-      fileName: 'morgen',
+      fileName: 'index',
     },
   },
 })
