@@ -43,13 +43,11 @@ const UNIT_WORDS: STRING_DEF[] = [
 export function parse(input: string): ParseResult | null {
   let repeatFrequency: string | undefined
 
-  let scheduleTriggerMatch: RegExpMatchArray | undefined
   let index = 0
   let text = ''
-  SCHEDULE_TRIGGER_WORDS.some((word) => {
+  const scheduleTriggerMatch = SCHEDULE_TRIGGER_WORDS.some((word) => {
     const match = input.match(new RegExp(`^${word} +| ${word} +`))
     if (match && match[0]) {
-      scheduleTriggerMatch = match
       index = match.index || 0
       if (match[0].at(0) === ' ') {
         index++
