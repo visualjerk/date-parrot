@@ -124,6 +124,7 @@ export function parse(input: string): ParseResult | null {
   let byMonth: Month | undefined
   let startDate = new Date()
 
+  // See if we have a schedule trigger word
   const scheduleTriggerMatch = SCHEDULE_TRIGGER_WORDS.some((word) => {
     const match = input.match(new RegExp(`^${word} +| ${word} +`, 'i'))
     if (match && match[0]) {
@@ -142,8 +143,9 @@ export function parse(input: string): ParseResult | null {
     return null
   }
 
+  // See if we have a enumaration like "2", "4.", "20th", etc.
   let enumMatch = false
-  const match = input.match(new RegExp('^(\\d+)th +', 'i'))
+  const match = input.match(new RegExp('^(\\d+)(th|.)? +', 'i'))
   if (match && match[0]) {
     const value = match[1]
     repeatFrequency = `P${value}`
@@ -152,6 +154,7 @@ export function parse(input: string): ParseResult | null {
     enumMatch = true
   }
 
+  // See if we have a distinct enum word like "first", "2nd", etc.
   if (!enumMatch) {
     enumMatch = ENUM_WORDS.some(([word, value]) => {
       const match = input.match(new RegExp(`^${word} +`, 'i'))
@@ -165,10 +168,12 @@ export function parse(input: string): ParseResult | null {
     })
   }
 
+  // If we dont't have an enum match, the frequency is set to 1
   if (!enumMatch) {
     repeatFrequency = 'P1'
   }
 
+  // See if we have a unit word like "minute", "hour", etc.
   const unitWordMatch = UNIT_WORDS.some(([word, unit]) => {
     const match = input.match(new RegExp(`^${word}s?$|^${word}s? `, 'i'))
     if (match && match[0]) {
@@ -181,6 +186,7 @@ export function parse(input: string): ParseResult | null {
     }
     return false
   })
+  // If we don't have a unit word, see if we have a week day
   if (!unitWordMatch) {
     const weekDayMatch = Object.entries(DayOfWeek).some(([day, value]) => {
       const match = input.match(new RegExp(`^${day}$|^${day} `, 'i'))
@@ -199,6 +205,7 @@ export function parse(input: string): ParseResult | null {
       }
       return false
     })
+    // See if we have a month
     if (!weekDayMatch) {
       const monthMatch = Object.entries(Month).some(([name, value]) => {
         const match = input.match(new RegExp(`^${name}$|^${name} `, 'i'))

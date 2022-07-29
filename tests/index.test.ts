@@ -177,6 +177,38 @@ describe('parse', () => {
       },
     ],
     [
+      'every 2 friday',
+      {
+        schedule: {
+          repeatFrequency: 'P2W',
+          byDay: DayOfWeek.Friday,
+          // today is a firday
+          startDate: TODAY_AS_ISO,
+        },
+        match: {
+          index: 0,
+          length: 14,
+          text: 'every 2 friday',
+        },
+      },
+    ],
+    [
+      'every 2. friday',
+      {
+        schedule: {
+          repeatFrequency: 'P2W',
+          byDay: DayOfWeek.Friday,
+          // today is a firday
+          startDate: TODAY_AS_ISO,
+        },
+        match: {
+          index: 0,
+          length: 15,
+          text: 'every 2. friday',
+        },
+      },
+    ],
+    [
       'every monday',
       {
         schedule: {
@@ -310,6 +342,16 @@ describe('parse', () => {
       ['12th', 12],
       ['28th', 28],
       ['300th', 300],
+
+      ['1.', 1],
+      ['2.', 2],
+      ['3.', 3],
+      ['333.', 333],
+
+      ['1', 1],
+      ['2', 2],
+      ['3', 3],
+      ['777', 777],
     ]
 
     it.each(TEST_CASES)('parses "%s" as "%s"', (enumWord, value) => {
