@@ -1,7 +1,9 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
+import { nextFriday, setMonth, setDate, addYears, formatISO } from 'date-fns'
 import { DayOfWeek, Month, parse, ParseResult } from '../src/parse'
 
-const TODAY = new Date('2022-01-01')
+const TODAY = new Date('2022-02-04')
+const TODAY_AS_ISO = formatISO(TODAY)
 const TEST_CASES: [string, ParseResult | null][] = [
   ['', null],
   ['hello', null],
@@ -14,7 +16,7 @@ const TEST_CASES: [string, ParseResult | null][] = [
     {
       schedule: {
         repeatFrequency: 'P1D',
-        startDate: TODAY.toISOString(),
+        startDate: TODAY_AS_ISO,
       },
       match: {
         index: 0,
@@ -24,11 +26,25 @@ const TEST_CASES: [string, ParseResult | null][] = [
     },
   ],
   [
+    'EverY Day',
+    {
+      schedule: {
+        repeatFrequency: 'P1D',
+        startDate: TODAY_AS_ISO,
+      },
+      match: {
+        index: 0,
+        length: 9,
+        text: 'EverY Day',
+      },
+    },
+  ],
+  [
     'every second day',
     {
       schedule: {
         repeatFrequency: 'P2D',
-        startDate: TODAY.toISOString(),
+        startDate: TODAY_AS_ISO,
       },
       match: {
         index: 0,
@@ -38,11 +54,25 @@ const TEST_CASES: [string, ParseResult | null][] = [
     },
   ],
   [
+    'Every SecoNd Day',
+    {
+      schedule: {
+        repeatFrequency: 'P2D',
+        startDate: TODAY_AS_ISO,
+      },
+      match: {
+        index: 0,
+        length: 16,
+        text: 'Every SecoNd Day',
+      },
+    },
+  ],
+  [
     'every third day',
     {
       schedule: {
         repeatFrequency: 'P3D',
-        startDate: TODAY.toISOString(),
+        startDate: TODAY_AS_ISO,
       },
       match: {
         index: 0,
@@ -56,7 +86,7 @@ const TEST_CASES: [string, ParseResult | null][] = [
     {
       schedule: {
         repeatFrequency: 'P1W',
-        startDate: TODAY.toISOString(),
+        startDate: TODAY_AS_ISO,
       },
       match: {
         index: 0,
@@ -70,7 +100,7 @@ const TEST_CASES: [string, ParseResult | null][] = [
     {
       schedule: {
         repeatFrequency: 'P2W',
-        startDate: TODAY.toISOString(),
+        startDate: TODAY_AS_ISO,
       },
       match: {
         index: 0,
@@ -80,11 +110,25 @@ const TEST_CASES: [string, ParseResult | null][] = [
     },
   ],
   [
-    'on every second week do workout',
+    'every  second   week',
     {
       schedule: {
         repeatFrequency: 'P2W',
-        startDate: TODAY.toISOString(),
+        startDate: TODAY_AS_ISO,
+      },
+      match: {
+        index: 0,
+        length: 20,
+        text: 'every  second   week',
+      },
+    },
+  ],
+  [
+    'on every second week go crazy',
+    {
+      schedule: {
+        repeatFrequency: 'P2W',
+        startDate: TODAY_AS_ISO,
       },
       match: {
         index: 3,
@@ -99,8 +143,7 @@ const TEST_CASES: [string, ParseResult | null][] = [
       schedule: {
         repeatFrequency: 'P1W',
         byDay: DayOfWeek.Friday,
-        // TODO: needs to be next friday
-        startDate: TODAY.toISOString(),
+        startDate: formatISO(nextFriday(TODAY)),
       },
       match: {
         index: 0,
@@ -115,13 +158,27 @@ const TEST_CASES: [string, ParseResult | null][] = [
       schedule: {
         repeatFrequency: 'P1Y',
         byMonth: Month.June,
-        // TODO: needs to the 1st of june
-        startDate: TODAY.toISOString(),
+        startDate: formatISO(setDate(setMonth(TODAY, 5), 1)),
       },
       match: {
         index: 0,
         length: 10,
         text: 'every june',
+      },
+    },
+  ],
+  [
+    'every january',
+    {
+      schedule: {
+        repeatFrequency: 'P1Y',
+        byMonth: Month.January,
+        startDate: formatISO(addYears(setDate(setMonth(TODAY, 0), 1), 1)),
+      },
+      match: {
+        index: 0,
+        length: 13,
+        text: 'every january',
       },
     },
   ],

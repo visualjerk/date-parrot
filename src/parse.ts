@@ -1,3 +1,18 @@
+import {
+  nextMonday,
+  nextTuesday,
+  nextWednesday,
+  nextThursday,
+  nextFriday,
+  nextSaturday,
+  nextSunday,
+  setDate,
+  setMonth,
+  addYears,
+  isPast,
+  formatISO,
+} from 'date-fns'
+
 export enum DayOfWeek {
   Monday = 1,
   Tuesday,
@@ -6,6 +21,16 @@ export enum DayOfWeek {
   Friday,
   Saturday,
   Sunday,
+}
+
+const dayOfWeekFunctions: Record<DayOfWeek, (date: Date) => Date> = {
+  [DayOfWeek.Monday]: nextMonday,
+  [DayOfWeek.Tuesday]: nextTuesday,
+  [DayOfWeek.Wednesday]: nextWednesday,
+  [DayOfWeek.Thursday]: nextThursday,
+  [DayOfWeek.Friday]: nextFriday,
+  [DayOfWeek.Saturday]: nextSaturday,
+  [DayOfWeek.Sunday]: nextSunday,
 }
 
 export enum Month {
@@ -62,9 +87,10 @@ export function parse(input: string): ParseResult | null {
   let text = ''
   let byDay: DayOfWeek | undefined
   let byMonth: Month | undefined
+  let startDate = new Date()
 
   const scheduleTriggerMatch = SCHEDULE_TRIGGER_WORDS.some((word) => {
-    const match = input.match(new RegExp(`^${word} +| ${word} +`))
+    const match = input.match(new RegExp(`^${word} +| ${word} +`, 'i'))
     if (match && match[0]) {
       index = match.index || 0
       if (match[0].at(0) === ' ') {
@@ -82,7 +108,7 @@ export function parse(input: string): ParseResult | null {
   }
 
   const enumWordMatch = ENUM_WORDS.some(([word, value]) => {
-    const match = input.match(new RegExp(`^${word} +`))
+    const match = input.match(new RegExp(`^${word} +`, 'i'))
     if (match && match[0]) {
       repeatFrequency = `P${value}`
       text = `${text}${match[0]}`
@@ -96,7 +122,7 @@ export function parse(input: string): ParseResult | null {
   }
 
   const unitWordMatch = UNIT_WORDS.some(([word, unit]) => {
-    const match = input.match(new RegExp(`^${word}$|^${word} `))
+    const match = input.match(new RegExp(`^${word}$|^${word} `, 'i'))
     if (match && match[0]) {
       repeatFrequency = `${repeatFrequency}${unit}`
       if (match[0].at(-1) === ' ') {
@@ -113,6 +139,7 @@ export function parse(input: string): ParseResult | null {
       if (match && match[0]) {
         repeatFrequency = `${repeatFrequency}W`
         byDay = value as DayOfWeek
+        startDate = dayOfWeekFunctions[value as DayOfWeek](startDate)
         if (match[0].at(-1) === ' ') {
           match[0] = match[0].trimEnd()
         }
@@ -127,6 +154,10 @@ export function parse(input: string): ParseResult | null {
         if (match && match[0]) {
           repeatFrequency = `${repeatFrequency}Y`
           byMonth = value as Month
+          startDate = setDate(setMonth(startDate, byMonth - 1), 1)
+          if (isPast(startDate)) {
+            startDate = addYears(startDate, 1)
+          }
           if (match[0].at(-1) === ' ') {
             match[0] = match[0].trimEnd()
           }
@@ -148,7 +179,7 @@ export function parse(input: string): ParseResult | null {
   const output: ParseResult = {
     schedule: {
       repeatFrequency,
-      startDate: new Date('2022-01-01').toISOString(),
+      startDate: formatISO(startDate),
       byDay,
       byMonth,
     },
