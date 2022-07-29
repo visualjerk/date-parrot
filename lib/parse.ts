@@ -186,13 +186,17 @@ export function parse(input: string): ParseResult | null {
     }
     return false
   })
+
   // If we don't have a unit word, see if we have a week day
   if (!unitWordMatch) {
     const weekDayMatch = Object.entries(DayOfWeek).some(([day, value]) => {
+      if (typeof value === 'string') {
+        return false
+      }
       const match = input.match(new RegExp(`^${day}$|^${day} `, 'i'))
       if (match && match[0]) {
         repeatFrequency = `${repeatFrequency}W`
-        byDay = value as DayOfWeek
+        byDay = value
         startDate = setDay(startDate, byDay, { weekStartsOn: 1 })
         if (isPast(startDate)) {
           startDate = addWeeks(startDate, 1)
@@ -208,10 +212,13 @@ export function parse(input: string): ParseResult | null {
     // See if we have a month
     if (!weekDayMatch) {
       const monthMatch = Object.entries(Month).some(([name, value]) => {
+        if (typeof value === 'string') {
+          return false
+        }
         const match = input.match(new RegExp(`^${name}$|^${name} `, 'i'))
         if (match && match[0]) {
           repeatFrequency = `${repeatFrequency}Y`
-          byMonth = value as Month
+          byMonth = value
           startDate = setDate(setMonth(startDate, byMonth - 1), 1)
           if (isPast(startDate)) {
             startDate = addYears(startDate, 1)

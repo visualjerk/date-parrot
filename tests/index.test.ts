@@ -18,6 +18,7 @@ describe('parse', () => {
     ['every secondday', null],
     ['everysecond day', null],
     ['every once in a while a second day', null],
+    ['every 2', null],
     [
       'every day',
       {
