@@ -13,7 +13,7 @@ npm install @visualjerk/morgen
 ## Usage
 
 ```ts
-import { parse } from 'morgen'
+import { parse } from '@visualjerk/morgen'
 
 parse('every second day')
 
@@ -32,7 +32,7 @@ parse('every second day')
 ```
 
 ```ts
-import { parse } from 'morgen'
+import { parse } from '@visualjerk/morgen'
 
 parse('eat donuts on every 3rd friday')
 
