@@ -2,7 +2,15 @@
 
 morgen.js parses natural language into a [unified schedule object](https://schema.org/Schedule).
 
-## Examples
+**This package is in a very early stage and not yet production ready.**
+
+## Installation
+
+```sh
+npm install @visualjerk/morgen
+```
+
+## Usage
 
 ```ts
 import { parse } from 'morgen'
