@@ -1,16 +1,16 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
 import { nextMonday, setMonth, setDate, addYears, formatISO } from 'date-fns'
-import { DayOfWeek, Month, parse, ParseResult } from '../lib/parse'
+import { DayOfWeek, Month, parseSchedule, ParseScheduleResult } from '../lib'
 
 const TODAY = new Date('2022-02-04')
 const TODAY_AS_ISO = formatISO(TODAY)
 
-describe('parse', () => {
+describe('parseSchedule', () => {
   beforeEach(() => {
     vi.useFakeTimers().setSystemTime(TODAY)
   })
 
-  const TEST_CASES: [string | null, ParseResult | null][] = [
+  const TEST_CASES: [string | null, ParseScheduleResult | null][] = [
     [null, null],
     ['', null],
     ['hello', null],
@@ -272,7 +272,7 @@ describe('parse', () => {
   ]
 
   it.each(TEST_CASES)('parses "%s"', (input, output) => {
-    expect(parse(input as string)).toEqual(output)
+    expect(parseSchedule(input as string)).toEqual(output)
   })
 
   describe('triggers', () => {
@@ -281,7 +281,7 @@ describe('parse', () => {
     it.each(TEST_CASES)('triggers on "%s"', (triggerWord) => {
       const input = `${triggerWord} day`
       const output = `P1D`
-      expect(parse(input)?.schedule.repeatFrequency).toEqual(output)
+      expect(parseSchedule(input)?.schedule.repeatFrequency).toEqual(output)
     })
   })
 
@@ -358,7 +358,7 @@ describe('parse', () => {
     it.each(TEST_CASES)('parses "%s" as "%s"', (enumWord, value) => {
       const input = `every ${enumWord} day`
       const output = `P${value}D`
-      expect(parse(input)?.schedule.repeatFrequency).toEqual(output)
+      expect(parseSchedule(input)?.schedule.repeatFrequency).toEqual(output)
     })
   })
 
@@ -383,7 +383,7 @@ describe('parse', () => {
     it.each(TEST_CASES)('parses "%s" as "%s"', (unitWord, value) => {
       const input = `every second ${unitWord}`
       const output = `P2${value}`
-      expect(parse(input)?.schedule.repeatFrequency).toEqual(output)
+      expect(parseSchedule(input)?.schedule.repeatFrequency).toEqual(output)
     })
   })
 })

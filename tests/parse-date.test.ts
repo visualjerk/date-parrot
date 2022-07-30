@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
 import { formatISO, addDays } from 'date-fns'
-import { parseDate, ParseDateResult } from '../lib/parse-date'
+import { parseDate, ParseDateResult } from '../lib'
 
 const TODAY = new Date('2022-02-04')
 const TODAY_AS_ISO = formatISO(TODAY)
@@ -31,6 +31,17 @@ describe('parseDate', () => {
         date: formatISO(addDays(TODAY, 1)),
         match: {
           index: 0,
+          length: 8,
+          text: 'tomorrow',
+        },
+      },
+    ],
+    [
+      'tame a bear tomorrow',
+      {
+        date: formatISO(addDays(TODAY, 1)),
+        match: {
+          index: 12,
           length: 8,
           text: 'tomorrow',
         },
