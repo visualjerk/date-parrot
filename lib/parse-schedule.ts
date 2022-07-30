@@ -8,6 +8,8 @@ import {
   formatISO,
 } from 'date-fns'
 import {
+  DayOfWeek,
+  Month,
   DAY_OF_WEEK_WORDS,
   MONTH_WORDS,
   SCHEDULE_TRIGGER_WORDS,
@@ -28,8 +30,8 @@ import {
  */
 export interface ParseScheduleResult {
   schedule: {
-    byDay?: number
-    byMonth?: number
+    byDay?: DayOfWeek
+    byMonth?: Month
     byMonthDay?: number
     byMonthWeek?: number
     repeatFrequency: string
@@ -49,8 +51,8 @@ export function parseSchedule(input: string): ParseScheduleResult | null {
   let repeatFrequency: string | undefined
   let index = 0
   let text = ''
-  let byDay: number | undefined
-  let byMonth: number | undefined
+  let byDay: DayOfWeek | undefined
+  let byMonth: Month | undefined
   let startDate = new Date()
 
   // See if we have a single word
