@@ -23,10 +23,10 @@ export enum Month {
   December,
 }
 
-type ENUM_DEF = [string, number]
-type STRING_DEF = [string, string]
+export type EnumDef = [string, number]
+export type StringDef = [string, string]
 
-export const SCHEDULE_SINGLE_WORDS: STRING_DEF[] = [
+export const SCHEDULE_SINGLE_WORDS: StringDef[] = [
   ['everyday', '1D'],
   ['daily', '1D'],
   ['weekly', '1W'],
@@ -35,7 +35,7 @@ export const SCHEDULE_SINGLE_WORDS: STRING_DEF[] = [
 ]
 export const SCHEDULE_TRIGGER_WORDS = ['every', 'each']
 
-export const SINGLE_DAY_WORDS: ENUM_DEF[] = [
+export const SINGLE_DAY_WORDS: EnumDef[] = [
   ['today', 0],
   ['tomorrow', 1],
   ['yesterday', -1],
@@ -43,7 +43,7 @@ export const SINGLE_DAY_WORDS: ENUM_DEF[] = [
 
 export const ENUM_SUFFIX = 'th'
 
-export const ENUM_WORDS: ENUM_DEF[] = [
+export const ENUM_WORDS: EnumDef[] = [
   ['first', 1],
   ['second', 2],
   ['third', 3],
@@ -91,7 +91,7 @@ export const ENUM_WORDS: ENUM_DEF[] = [
   ['3rd', 3],
 ]
 
-export const UNIT_WORDS: STRING_DEF[] = [
+export const UNIT_WORDS: StringDef[] = [
   ['second', 's'],
   ['minute', 'm'],
   ['hour', 'h'],

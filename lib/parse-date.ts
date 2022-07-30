@@ -1,5 +1,6 @@
 import { addDays, formatISO } from 'date-fns'
 import { SINGLE_DAY_WORDS } from './constants'
+import { onSingleWordMatch } from './utils'
 
 /**
  * https://schema.org/Schedule
@@ -22,22 +23,16 @@ export function parseDate(input: string): ParseDateResult | null {
   let text = ''
 
   // See if we have a single word
-  const singleWordMatch = SINGLE_DAY_WORDS.some(([word, value]) => {
-    const match = input.match(
-      new RegExp(`^${word} +| ${word} +| ${word}$|^${word}$`, 'i')
-    )
-    if (match && match[0]) {
-      index = match.index || 0
-      if (match[0].at(0) === ' ') {
-        index++
-      }
-      match[0] = match[0].trim()
-      text = match[0]
+  const singleWordMatch = onSingleWordMatch(
+    SINGLE_DAY_WORDS,
+    input,
+    (matchIndex, matchText, value) => {
+      index = matchIndex
+      text = matchText
       date = addDays(date, value)
-      return true
     }
-    return false
-  })
+  )
+
   if (!singleWordMatch) {
     return null
   }

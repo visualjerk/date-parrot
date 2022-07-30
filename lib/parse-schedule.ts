@@ -17,6 +17,7 @@ import {
   ENUM_SUFFIX,
   UNIT_SUFFIX,
 } from './constants'
+import { onSingleWordMatch } from './utils'
 
 /**
  * https://schema.org/Schedule
@@ -49,24 +50,17 @@ export function parseSchedule(input: string): ParseScheduleResult | null {
   let startDate = new Date()
 
   // See if we have a single word
-  const singleDayWordMatch = SCHEDULE_SINGLE_WORDS.some(([word, value]) => {
-    const match = input.match(
-      new RegExp(`^${word} +| ${word} +| ${word}$|^${word}$`, 'i')
-    )
-    if (match && match[0]) {
-      index = match.index || 0
-      if (match[0].at(0) === ' ') {
-        index++
-      }
-      match[0] = match[0].trim()
-      text = match[0]
+  const singleWordMatch = onSingleWordMatch(
+    SCHEDULE_SINGLE_WORDS,
+    input,
+    (matchIndex, matchText, value) => {
+      index = matchIndex
+      text = matchText
       repeatFrequency = `P${value}`
-      return true
     }
-    return false
-  })
+  )
 
-  if (singleDayWordMatch && repeatFrequency) {
+  if (singleWordMatch && repeatFrequency) {
     const output: ParseScheduleResult = {
       schedule: {
         repeatFrequency,
