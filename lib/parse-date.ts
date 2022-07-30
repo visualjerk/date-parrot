@@ -1,5 +1,6 @@
 import { addDays, formatISO } from 'date-fns'
-import { SINGLE_DAY_WORDS } from './constants'
+import { locales } from './locales'
+import { ParserConfig } from './types'
 import { onSingleWordMatch } from './utils'
 
 /**
@@ -14,36 +15,47 @@ export interface ParseDateResult {
   }
 }
 
-export function parseDate(input: string): ParseDateResult | null {
+export function parseDate(
+  input: string,
+  config: ParserConfig = { locales: ['en'] }
+): ParseDateResult | null {
   if (!input) {
     return null
   }
-  let date = new Date()
-  let index = 0
-  let text = ''
 
-  // See if we have a single word
-  const singleWordMatch = onSingleWordMatch(
-    SINGLE_DAY_WORDS,
-    input,
-    (matchIndex, matchText, value) => {
-      index = matchIndex
-      text = matchText
-      date = addDays(date, value)
+  const localeConfigs = config.locales.map((key) => locales[key])
+
+  for (const config of localeConfigs) {
+    const { SINGLE_DAY_WORDS } = config
+
+    let date = new Date()
+    let index = 0
+    let text = ''
+
+    // See if we have a single word
+    const singleWordMatch = onSingleWordMatch(
+      SINGLE_DAY_WORDS,
+      input,
+      (matchIndex, matchText, value) => {
+        index = matchIndex
+        text = matchText
+        date = addDays(date, value)
+      }
+    )
+
+    if (!singleWordMatch) {
+      return null
     }
-  )
 
-  if (!singleWordMatch) {
-    return null
+    const output: ParseDateResult = {
+      date: formatISO(date),
+      match: {
+        index,
+        length: text.length,
+        text,
+      },
+    }
+    return output
   }
-
-  const output: ParseDateResult = {
-    date: formatISO(date),
-    match: {
-      index,
-      length: text.length,
-      text,
-    },
-  }
-  return output
+  return null
 }

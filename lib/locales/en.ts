@@ -1,15 +1,4 @@
-export type EnumDef = [string, number]
-export type StringDef = [string, string]
-
-export enum DayOfWeek {
-  Sunday,
-  Monday,
-  Tuesday,
-  Wednesday,
-  Thursday,
-  Friday,
-  Saturday,
-}
+import { EnumDef, StringDef } from '../types'
 
 export const DAY_OF_WEEK_WORDS: EnumDef[] = [
   ['sunday', 0],
@@ -20,21 +9,6 @@ export const DAY_OF_WEEK_WORDS: EnumDef[] = [
   ['friday', 5],
   ['saturday', 6],
 ]
-
-export enum Month {
-  January = 1,
-  February,
-  March,
-  April,
-  May,
-  June,
-  July,
-  August,
-  September,
-  October,
-  November,
-  December,
-}
 
 export const MONTH_WORDS: EnumDef[] = [
   ['january', 1],
@@ -125,3 +99,14 @@ export const UNIT_WORDS: StringDef[] = [
   ['months?', 'M'],
   ['years?', 'Y'],
 ]
+
+export const en = {
+  DAY_OF_WEEK_WORDS,
+  MONTH_WORDS,
+  SCHEDULE_SINGLE_WORDS,
+  SCHEDULE_TRIGGER_WORDS,
+  SINGLE_DAY_WORDS,
+  ENUM_SUFFIX,
+  ENUM_WORDS,
+  UNIT_WORDS,
+}

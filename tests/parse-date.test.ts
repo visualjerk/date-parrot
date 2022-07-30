@@ -77,4 +77,35 @@ describe('parseDate', () => {
   it.each(TEST_CASES)('parses "%s"', (input, output) => {
     expect(parseDate(input as string)).toEqual(output)
   })
+
+  describe('german', () => {
+    const TEST_CASES: [string | null, ParseDateResult | null][] = [
+      [
+        'heute',
+        {
+          date: TODAY_AS_ISO,
+          match: {
+            index: 0,
+            length: 5,
+            text: 'heute',
+          },
+        },
+      ],
+      [
+        'morgen',
+        {
+          date: formatISO(addDays(TODAY, 1)),
+          match: {
+            index: 0,
+            length: 6,
+            text: 'morgen',
+          },
+        },
+      ],
+    ]
+
+    it.each(TEST_CASES)('parses "%s"', (input, output) => {
+      expect(parseDate(input as string, { locales: ['de'] })).toEqual(output)
+    })
+  })
 })

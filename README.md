@@ -65,3 +65,25 @@ parseSchedule('eat donuts on every 3rd friday')
 //   },
 // }
 ```
+
+## Localization
+
+By default DateParrot only parses english but you can add support for other languages by adding a `locales` property to the config of the parser functions.
+
+It takes an array of locale identifiers (e.g. `['en', 'de']`).
+
+```ts
+import { parseDate } from 'date-parrot'
+
+parseDate('lass uns morgen ausgehen', { locales: ['de']' })
+
+// =>
+// {
+//   date: [TOMORROW_AS_ISO_STRING],
+//   match: {
+//     index: 9,
+//     length: 6,
+//     text: 'morgen',
+//   },
+// }
+```

@@ -1,4 +1,4 @@
-import { EnumDef, StringDef } from './constants'
+import { EnumDef, StringDef } from './types'
 
 type TValue<TDef extends EnumDef | StringDef | string> = TDef extends string
   ? TDef
