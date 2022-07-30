@@ -57,7 +57,7 @@ const textParts = computed(() => {
         class="border border-transparent absolute inset-0 pointer-events-none p-4 text-xl font-extrabold whitespace-pre text-slate-700"
       >
         <template v-for="part in textParts">
-          <span v-if="part.isSchedule || part.isDate" class="text-pink-500">
+          <span v-if="part.isSchedule" class="text-pink-500">
             {{ part.value }}
           </span>
           <span v-else>
