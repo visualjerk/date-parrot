@@ -26,11 +26,19 @@ export enum Month {
 type ENUM_DEF = [string, number]
 type STRING_DEF = [string, string]
 
+export const SCHEDULE_SINGLE_DAY_WORDS: ENUM_DEF[] = [
+  ['everyday', 1],
+  ['daily', 1],
+]
+export const SCHEDULE_TRIGGER_WORDS = ['every', 'each']
+
 export const SINGLE_DAY_WORDS: ENUM_DEF[] = [
   ['today', 0],
   ['tomorrow', 1],
   ['yesterday', -1],
 ]
+
+export const ENUM_SUFFIX = 'th'
 
 export const ENUM_WORDS: ENUM_DEF[] = [
   ['first', 1],
@@ -89,3 +97,5 @@ export const UNIT_WORDS: STRING_DEF[] = [
   ['month', 'M'],
   ['year', 'Y'],
 ]
+
+export const UNIT_SUFFIX = 's'

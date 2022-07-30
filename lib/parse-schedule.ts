@@ -7,7 +7,16 @@ import {
   isPast,
   formatISO,
 } from 'date-fns'
-import { DayOfWeek, Month, ENUM_WORDS, UNIT_WORDS } from './constants'
+import {
+  DayOfWeek,
+  Month,
+  SCHEDULE_TRIGGER_WORDS,
+  SCHEDULE_SINGLE_DAY_WORDS,
+  ENUM_WORDS,
+  UNIT_WORDS,
+  ENUM_SUFFIX,
+  UNIT_SUFFIX,
+} from './constants'
 
 /**
  * https://schema.org/Schedule
@@ -28,8 +37,6 @@ export interface ParseScheduleResult {
   }
 }
 
-const SCHEDULE_TRIGGER_WORDS = ['every', 'each']
-
 export function parseSchedule(input: string): ParseScheduleResult | null {
   if (!input) {
     return null
@@ -40,6 +47,41 @@ export function parseSchedule(input: string): ParseScheduleResult | null {
   let byDay: DayOfWeek | undefined
   let byMonth: Month | undefined
   let startDate = new Date()
+
+  // See if we have a single word
+  const singleDayWordMatch = SCHEDULE_SINGLE_DAY_WORDS.some(([word, value]) => {
+    const match = input.match(
+      new RegExp(`^${word} +| ${word} +| ${word}$|^${word}$`, 'i')
+    )
+    if (match && match[0]) {
+      index = match.index || 0
+      if (match[0].at(0) === ' ') {
+        index++
+      }
+      match[0] = match[0].trim()
+      text = match[0]
+      repeatFrequency = `P${value}D`
+      return true
+    }
+    return false
+  })
+
+  if (singleDayWordMatch && repeatFrequency) {
+    const output: ParseScheduleResult = {
+      schedule: {
+        repeatFrequency,
+        startDate: formatISO(startDate),
+        byDay,
+        byMonth,
+      },
+      match: {
+        index,
+        length: text.length,
+        text,
+      },
+    }
+    return output
+  }
 
   // See if we have a schedule trigger word
   const scheduleTriggerMatch = SCHEDULE_TRIGGER_WORDS.some((word) => {
@@ -62,7 +104,7 @@ export function parseSchedule(input: string): ParseScheduleResult | null {
 
   // See if we have a enumaration like "2", "4.", "20th", etc.
   let enumMatch = false
-  const match = input.match(new RegExp('^(\\d+)(th|.)? +', 'i'))
+  const match = input.match(new RegExp(`^(\\d+)(${ENUM_SUFFIX}|.)? +`, 'i'))
   if (match && match[0]) {
     const value = match[1]
     repeatFrequency = `P${value}`
@@ -92,7 +134,9 @@ export function parseSchedule(input: string): ParseScheduleResult | null {
 
   // See if we have a unit word like "minute", "hour", etc.
   const unitWordMatch = UNIT_WORDS.some(([word, unit]) => {
-    const match = input.match(new RegExp(`^${word}s?$|^${word}s? `, 'i'))
+    const match = input.match(
+      new RegExp(`^${word}${UNIT_SUFFIX}?$|^${word}${UNIT_SUFFIX}? `, 'i')
+    )
     if (match && match[0]) {
       repeatFrequency = `${repeatFrequency}${unit}`
       if (match[0].at(-1) === ' ') {

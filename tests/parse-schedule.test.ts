@@ -14,11 +14,38 @@ describe('parseSchedule', () => {
     [null, null],
     ['', null],
     ['hello', null],
-    ['everyday', null],
     ['every secondday', null],
     ['everysecond day', null],
     ['every once in a while a second day', null],
     ['every 2', null],
+    [
+      'everyday',
+      {
+        schedule: {
+          repeatFrequency: 'P1D',
+          startDate: TODAY_AS_ISO,
+        },
+        match: {
+          index: 0,
+          length: 8,
+          text: 'everyday',
+        },
+      },
+    ],
+    [
+      'daily',
+      {
+        schedule: {
+          repeatFrequency: 'P1D',
+          startDate: TODAY_AS_ISO,
+        },
+        match: {
+          index: 0,
+          length: 5,
+          text: 'daily',
+        },
+      },
+    ],
     [
       'every day',
       {
