@@ -413,4 +413,18 @@ describe('parseSchedule', () => {
       expect(parseSchedule(input)?.schedule.repeatFrequency).toEqual(output)
     })
   })
+
+  describe('single words', () => {
+    const TEST_CASES: [string, string][] = [
+      ['everyday', 'P1D'],
+      ['daily', 'P1D'],
+      ['weekly', 'P1W'],
+      ['monthly', 'P1M'],
+      ['yearly', 'P1Y'],
+    ]
+
+    it.each(TEST_CASES)('parses "%s" as "%s"', (input, output) => {
+      expect(parseSchedule(input)?.schedule.repeatFrequency).toEqual(output)
+    })
+  })
 })

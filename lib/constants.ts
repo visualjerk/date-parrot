@@ -26,9 +26,12 @@ export enum Month {
 type ENUM_DEF = [string, number]
 type STRING_DEF = [string, string]
 
-export const SCHEDULE_SINGLE_DAY_WORDS: ENUM_DEF[] = [
-  ['everyday', 1],
-  ['daily', 1],
+export const SCHEDULE_SINGLE_WORDS: STRING_DEF[] = [
+  ['everyday', '1D'],
+  ['daily', '1D'],
+  ['weekly', '1W'],
+  ['monthly', '1M'],
+  ['yearly', '1Y'],
 ]
 export const SCHEDULE_TRIGGER_WORDS = ['every', 'each']
 

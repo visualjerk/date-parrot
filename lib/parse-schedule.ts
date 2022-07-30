@@ -11,7 +11,7 @@ import {
   DayOfWeek,
   Month,
   SCHEDULE_TRIGGER_WORDS,
-  SCHEDULE_SINGLE_DAY_WORDS,
+  SCHEDULE_SINGLE_WORDS,
   ENUM_WORDS,
   UNIT_WORDS,
   ENUM_SUFFIX,
@@ -49,7 +49,7 @@ export function parseSchedule(input: string): ParseScheduleResult | null {
   let startDate = new Date()
 
   // See if we have a single word
-  const singleDayWordMatch = SCHEDULE_SINGLE_DAY_WORDS.some(([word, value]) => {
+  const singleDayWordMatch = SCHEDULE_SINGLE_WORDS.some(([word, value]) => {
     const match = input.match(
       new RegExp(`^${word} +| ${word} +| ${word}$|^${word}$`, 'i')
     )
@@ -60,7 +60,7 @@ export function parseSchedule(input: string): ParseScheduleResult | null {
       }
       match[0] = match[0].trim()
       text = match[0]
-      repeatFrequency = `P${value}D`
+      repeatFrequency = `P${value}`
       return true
     }
     return false
