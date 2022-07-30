@@ -1,19 +1,19 @@
-# morgen.js
+# DateParrot
 
-morgen.js parses natural language into a [unified schedule object](https://schema.org/Schedule) or ISO date.
+DateParrot parses natural language into a [unified schedule object](https://schema.org/Schedule) or ISO date.
 
 **This package is in a very early stage and not yet production ready.**
 
 ## Installation
 
 ```sh
-npm install @visualjerk/morgen
+npm install date-parrot
 ```
 
 ## Usage
 
 ```ts
-import { parseDate } from '@visualjerk/morgen'
+import { parseDate } from 'date-parrot'
 
 parseDate('lets go out tomorrow')
 
@@ -29,7 +29,7 @@ parseDate('lets go out tomorrow')
 ```
 
 ```ts
-import { parseSchedule } from '@visualjerk/morgen'
+import { parseSchedule } from 'date-parrot'
 
 parseSchedule('every second day')
 
@@ -48,7 +48,7 @@ parseSchedule('every second day')
 ```
 
 ```ts
-import { parseSchedule } from '@visualjerk/morgen'
+import { parseSchedule } from 'date-parrot'
 
 parseSchedule('eat donuts on every 3rd friday')
 
