@@ -28,6 +28,8 @@
 
 .vp-doc h1 {
   color: var(--vp-c-brand);
+  font-size: 3rem;
+  margin-bottom: 2rem;
 }
 
 .vp-doc h1, .vp-doc h2, .vp-doc h3, .vp-doc h4, .vp-doc h5, .vp-doc h6 {
