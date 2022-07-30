@@ -4,6 +4,8 @@ DateParrot parses natural language into a [unified schedule object](https://sche
 
 **This package is in a very early stage and not yet production ready.**
 
+[Open Playground](https://visualjerk.github.io/date-parrot/)
+
 ## Installation
 
 ```sh
