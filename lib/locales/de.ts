@@ -1,6 +1,6 @@
 import { EnumDef, StringDef } from '../types'
 
-export const DAY_OF_WEEK_WORDS: EnumDef[] = [
+const DAY_OF_WEEK_WORDS: EnumDef[] = [
   ['sonntag', 0],
   ['montag', 1],
   ['dienstag', 2],
@@ -10,7 +10,7 @@ export const DAY_OF_WEEK_WORDS: EnumDef[] = [
   ['samstag', 6],
 ]
 
-export const MONTH_WORDS: EnumDef[] = [
+const MONTH_WORDS: EnumDef[] = [
   ['januar', 1],
   ['februar', 2],
   ['märz', 3],
@@ -25,24 +25,25 @@ export const MONTH_WORDS: EnumDef[] = [
   ['dezember', 12],
 ]
 
-export const SCHEDULE_SINGLE_WORDS: StringDef[] = [
+const SCHEDULE_SINGLE_WORDS: StringDef[] = [
   ['täglich', '1D'],
   ['wöchentlich', '1W'],
   ['monatlich', '1M'],
   ['jährlich', '1Y'],
 ]
-export const SCHEDULE_TRIGGER_WORDS = ['jeden', 'jede', 'alle']
 
-export const SINGLE_DAY_WORDS: EnumDef[] = [
+const SCHEDULE_TRIGGER_WORDS = ['jeden', 'jede', 'alle']
+
+const SINGLE_DAY_WORDS: EnumDef[] = [
   ['heute', 0],
   ['morgen', 1],
   ['übermorgen', 2],
   ['gestern', -1],
 ]
 
-export const ENUM_SUFFIX = 'ter?'
+const ENUM_SUFFIX = 'ter?'
 
-export const ENUM_WORDS: EnumDef[] = [
+const ENUM_WORDS: EnumDef[] = [
   ['erste[rn]?', 1],
   ['zweite[rn]?', 2],
   ['dritte[rn]?', 3],
@@ -87,7 +88,7 @@ export const ENUM_WORDS: EnumDef[] = [
   ['dreißig', 30],
 ]
 
-export const UNIT_WORDS: StringDef[] = [
+const UNIT_WORDS: StringDef[] = [
   ['sekunden?', 's'],
   ['minuten?', 'm'],
   ['stunden?', 'h'],
