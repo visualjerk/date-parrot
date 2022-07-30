@@ -429,4 +429,43 @@ describe('parseSchedule', () => {
       expect(parseSchedule(input)?.schedule.repeatFrequency).toEqual(output)
     })
   })
+
+  describe('mixed locales', () => {
+    const TEST_CASES: [string | null, ParseScheduleResult | null][] = [
+      [
+        'täglich',
+        {
+          schedule: {
+            repeatFrequency: 'P1D',
+            startDate: TODAY_AS_ISO,
+          },
+          match: {
+            index: 0,
+            length: 7,
+            text: 'täglich',
+          },
+        },
+      ],
+      [
+        'everyday',
+        {
+          schedule: {
+            repeatFrequency: 'P1D',
+            startDate: TODAY_AS_ISO,
+          },
+          match: {
+            index: 0,
+            length: 8,
+            text: 'everyday',
+          },
+        },
+      ],
+    ]
+
+    it.each(TEST_CASES)('parses "%s"', (input, output) => {
+      expect(parseSchedule(input as string, { locales: ['en', 'de'] })).toEqual(
+        output
+      )
+    })
+  })
 })

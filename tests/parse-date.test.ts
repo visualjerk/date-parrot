@@ -108,4 +108,37 @@ describe('parseDate', () => {
       expect(parseDate(input as string, { locales: ['de'] })).toEqual(output)
     })
   })
+
+  describe('mixed locales', () => {
+    const TEST_CASES: [string | null, ParseDateResult | null][] = [
+      [
+        'heute',
+        {
+          date: TODAY_AS_ISO,
+          match: {
+            index: 0,
+            length: 5,
+            text: 'heute',
+          },
+        },
+      ],
+      [
+        'today',
+        {
+          date: TODAY_AS_ISO,
+          match: {
+            index: 0,
+            length: 5,
+            text: 'today',
+          },
+        },
+      ],
+    ]
+
+    it.each(TEST_CASES)('parses "%s"', (input, output) => {
+      expect(parseDate(input as string, { locales: ['en', 'de'] })).toEqual(
+        output
+      )
+    })
+  })
 })

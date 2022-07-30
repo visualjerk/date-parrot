@@ -43,19 +43,17 @@ export function parseDate(
       }
     )
 
-    if (!singleWordMatch) {
-      return null
+    if (singleWordMatch) {
+      const output: ParseDateResult = {
+        date: formatISO(date),
+        match: {
+          index,
+          length: text.length,
+          text,
+        },
+      }
+      return output
     }
-
-    const output: ParseDateResult = {
-      date: formatISO(date),
-      match: {
-        index,
-        length: text.length,
-        text,
-      },
-    }
-    return output
   }
   return null
 }

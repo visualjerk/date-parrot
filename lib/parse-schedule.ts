@@ -103,7 +103,7 @@ export function parseSchedule(
     )
 
     if (!scheduleTriggerMatch) {
-      return null
+      continue
     }
 
     // See if we have an enumaration like "2", "4.", "20th", etc.
@@ -177,13 +177,13 @@ export function parseSchedule(
         )
 
         if (!monthMatch) {
-          return null
+          continue
         }
       }
     }
 
     if (!repeatFrequency) {
-      return null
+      continue
     }
 
     const output: ParseScheduleResult = {
