@@ -1,6 +1,6 @@
 # morgen.js
 
-morgen.js parses natural language into a [unified schedule object](https://schema.org/Schedule).
+morgen.js parses natural language into a [unified schedule object](https://schema.org/Schedule) or ISO date.
 
 **This package is in a very early stage and not yet production ready.**
 
@@ -13,9 +13,25 @@ npm install @visualjerk/morgen
 ## Usage
 
 ```ts
-import { parse } from '@visualjerk/morgen'
+import { parseDate } from '@visualjerk/morgen'
 
-parse('every second day')
+parseDate('lets go out tomorrow')
+
+// =>
+// {
+//   date: [TOMORROW_AS_ISO_STRING],
+//   match: {
+//     index: 12,
+//     length: 8,
+//     text: 'tomorrow',
+//   },
+// }
+```
+
+```ts
+import { parseSchedule } from '@visualjerk/morgen'
+
+parseSchedule('every second day')
 
 // =>
 // {
@@ -32,9 +48,9 @@ parse('every second day')
 ```
 
 ```ts
-import { parse } from '@visualjerk/morgen'
+import { parseSchedule } from '@visualjerk/morgen'
 
-parse('eat donuts on every 3rd friday')
+parseSchedule('eat donuts on every 3rd friday')
 
 // =>
 // {
