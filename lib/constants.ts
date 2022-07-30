@@ -1,3 +1,6 @@
+export type EnumDef = [string, number]
+export type StringDef = [string, string]
+
 export enum DayOfWeek {
   Sunday,
   Monday,
@@ -7,6 +10,16 @@ export enum DayOfWeek {
   Friday,
   Saturday,
 }
+
+export const DAY_OF_WEEK_WORDS: EnumDef[] = [
+  ['sunday', 0],
+  ['monday', 1],
+  ['tuesday', 2],
+  ['wednesday', 3],
+  ['thursday', 4],
+  ['friday', 5],
+  ['saturday', 6],
+]
 
 export enum Month {
   January = 1,
@@ -23,8 +36,20 @@ export enum Month {
   December,
 }
 
-export type EnumDef = [string, number]
-export type StringDef = [string, string]
+export const MONTH_WORDS: EnumDef[] = [
+  ['january', 1],
+  ['february', 2],
+  ['march', 3],
+  ['april', 4],
+  ['may', 5],
+  ['june', 6],
+  ['july', 7],
+  ['august', 8],
+  ['september', 9],
+  ['october', 10],
+  ['november', 11],
+  ['december', 12],
+]
 
 export const SCHEDULE_SINGLE_WORDS: StringDef[] = [
   ['everyday', '1D'],
@@ -92,13 +117,11 @@ export const ENUM_WORDS: EnumDef[] = [
 ]
 
 export const UNIT_WORDS: StringDef[] = [
-  ['second', 's'],
-  ['minute', 'm'],
-  ['hour', 'h'],
-  ['day', 'D'],
-  ['week', 'W'],
-  ['month', 'M'],
-  ['year', 'Y'],
+  ['seconds?', 's'],
+  ['minutes?', 'm'],
+  ['hours?', 'h'],
+  ['days?', 'D'],
+  ['weeks?', 'W'],
+  ['months?', 'M'],
+  ['years?', 'Y'],
 ]
-
-export const UNIT_SUFFIX = 's'

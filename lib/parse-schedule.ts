@@ -8,24 +8,28 @@ import {
   formatISO,
 } from 'date-fns'
 import {
-  DayOfWeek,
-  Month,
+  DAY_OF_WEEK_WORDS,
+  MONTH_WORDS,
   SCHEDULE_TRIGGER_WORDS,
   SCHEDULE_SINGLE_WORDS,
   ENUM_WORDS,
   UNIT_WORDS,
   ENUM_SUFFIX,
-  UNIT_SUFFIX,
 } from './constants'
-import { onSingleWordMatch } from './utils'
+import {
+  onSingleWordMatch,
+  onTriggerWordMatch,
+  onMiddleWordMatch,
+  onClosingWordMatch,
+} from './utils'
 
 /**
  * https://schema.org/Schedule
  */
 export interface ParseScheduleResult {
   schedule: {
-    byDay?: DayOfWeek
-    byMonth?: Month
+    byDay?: number
+    byMonth?: number
     byMonthDay?: number
     byMonthWeek?: number
     repeatFrequency: string
@@ -45,8 +49,8 @@ export function parseSchedule(input: string): ParseScheduleResult | null {
   let repeatFrequency: string | undefined
   let index = 0
   let text = ''
-  let byDay: DayOfWeek | undefined
-  let byMonth: Month | undefined
+  let byDay: number | undefined
+  let byMonth: number | undefined
   let startDate = new Date()
 
   // See if we have a single word
@@ -78,27 +82,23 @@ export function parseSchedule(input: string): ParseScheduleResult | null {
   }
 
   // See if we have a schedule trigger word
-  const scheduleTriggerMatch = SCHEDULE_TRIGGER_WORDS.some((word) => {
-    const match = input.match(new RegExp(`^${word} +| ${word} +`, 'i'))
-    if (match && match[0]) {
-      index = match.index || 0
-      if (match[0].at(0) === ' ') {
-        index++
-        match[0] = match[0].trimStart()
-      }
-      text = match[0]
-      input = input.slice(index + match[0].length)
-      return true
+  const scheduleTriggerMatch = onTriggerWordMatch(
+    SCHEDULE_TRIGGER_WORDS,
+    input,
+    (matchIndex, matchText) => {
+      index = matchIndex
+      text = matchText
+      input = input.slice(index + text.length)
     }
-    return false
-  })
+  )
+
   if (!scheduleTriggerMatch) {
     return null
   }
 
-  // See if we have a enumaration like "2", "4.", "20th", etc.
+  // See if we have an enumaration like "2", "4.", "20th", etc.
   let enumMatch = false
-  const match = input.match(new RegExp(`^(\\d+)(${ENUM_SUFFIX}|.)? +`, 'i'))
+  const match = input.match(new RegExp(`^(\\d+)(${ENUM_SUFFIX}|.)? `, 'i'))
   if (match && match[0]) {
     const value = match[1]
     repeatFrequency = `P${value}`
@@ -109,15 +109,10 @@ export function parseSchedule(input: string): ParseScheduleResult | null {
 
   // See if we have a distinct enum word like "first", "2nd", etc.
   if (!enumMatch) {
-    enumMatch = ENUM_WORDS.some(([word, value]) => {
-      const match = input.match(new RegExp(`^${word} +`, 'i'))
-      if (match && match[0]) {
-        repeatFrequency = `P${value}`
-        text = `${text}${match[0]}`
-        input = input.slice(match[0].length)
-        return true
-      }
-      return false
+    enumMatch = onMiddleWordMatch(ENUM_WORDS, input, (_, matchText, value) => {
+      repeatFrequency = `P${value}`
+      text = `${text}${matchText}`
+      input = input.slice(matchText.length)
     })
   }
 
@@ -127,65 +122,46 @@ export function parseSchedule(input: string): ParseScheduleResult | null {
   }
 
   // See if we have a unit word like "minute", "hour", etc.
-  const unitWordMatch = UNIT_WORDS.some(([word, unit]) => {
-    const match = input.match(
-      new RegExp(`^${word}${UNIT_SUFFIX}?$|^${word}${UNIT_SUFFIX}? `, 'i')
-    )
-    if (match && match[0]) {
+  const unitWordMatch = onClosingWordMatch(
+    UNIT_WORDS,
+    input,
+    (_, matchText, unit) => {
       repeatFrequency = `${repeatFrequency}${unit}`
-      if (match[0].at(-1) === ' ') {
-        match[0] = match[0].trimEnd()
-      }
-      text = `${text}${match[0]}`
-      return true
+      text = `${text}${matchText}`
     }
-    return false
-  })
+  )
 
   // If we don't have a unit word, see if we have a week day
   if (!unitWordMatch) {
-    const weekDayMatch = Object.entries(DayOfWeek).some(([day, value]) => {
-      if (typeof value === 'string') {
-        return false
-      }
-      const match = input.match(new RegExp(`^${day}$|^${day} `, 'i'))
-      if (match && match[0]) {
+    const weekDayMatch = onClosingWordMatch(
+      DAY_OF_WEEK_WORDS,
+      input,
+      (_, matchText, value) => {
         repeatFrequency = `${repeatFrequency}W`
         byDay = value
         startDate = setDay(startDate, byDay, { weekStartsOn: 1 })
         if (isPast(startDate)) {
           startDate = addWeeks(startDate, 1)
         }
-        if (match[0].at(-1) === ' ') {
-          match[0] = match[0].trimEnd()
-        }
-        text = `${text}${match[0]}`
-        return true
+        text = `${text}${matchText}`
       }
-      return false
-    })
+    )
     // See if we have a month
     if (!weekDayMatch) {
-      const monthMatch = Object.entries(Month).some(([name, value]) => {
-        if (typeof value === 'string') {
-          return false
-        }
-        const match = input.match(new RegExp(`^${name}$|^${name} `, 'i'))
-        if (match && match[0]) {
+      const monthMatch = onClosingWordMatch(
+        MONTH_WORDS,
+        input,
+        (_, matchText, value) => {
           repeatFrequency = `${repeatFrequency}Y`
           byMonth = value
           startDate = setDate(setMonth(startDate, byMonth - 1), 1)
           if (isPast(startDate)) {
             startDate = addYears(startDate, 1)
           }
-          if (match[0].at(-1) === ' ') {
-            match[0] = match[0].trimEnd()
-          }
-          text = `${text}${match[0]}`
-          return true
+          text = `${text}${matchText}`
         }
-        return false
-      })
+      )
+
       if (!monthMatch) {
         return null
       }

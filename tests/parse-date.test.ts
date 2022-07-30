@@ -14,6 +14,9 @@ describe('parseDate', () => {
     [null, null],
     ['', null],
     ['hello', null],
+    ['heytoday', null],
+    ['todayson', null],
+    ['hey todayson', null],
     [
       'today',
       {
@@ -42,6 +45,17 @@ describe('parseDate', () => {
         date: formatISO(addDays(TODAY, 1)),
         match: {
           index: 12,
+          length: 8,
+          text: 'tomorrow',
+        },
+      },
+    ],
+    [
+      'tomorrow tame a bear',
+      {
+        date: formatISO(addDays(TODAY, 1)),
+        match: {
+          index: 0,
           length: 8,
           text: 'tomorrow',
         },
