@@ -370,6 +370,9 @@ describe('parseSchedule', () => {
       ['10th', 10],
       ['11th', 11],
       ['12th', 12],
+      ['21st', 21],
+      ['22nd', 22],
+      ['23rd', 23],
       ['28th', 28],
       ['300th', 300],
 
@@ -427,6 +430,45 @@ describe('parseSchedule', () => {
 
     it.each(TEST_CASES)('parses "%s" as "%s"', (input, output) => {
       expect(parseSchedule(input)?.schedule.repeatFrequency).toEqual(output)
+    })
+  })
+
+  describe('german', () => {
+    const TEST_CASES: [string | null, ParseScheduleResult | null][] = [
+      [
+        'täglich',
+        {
+          schedule: {
+            repeatFrequency: 'P1D',
+            startDate: TODAY_AS_ISO,
+          },
+          match: {
+            index: 0,
+            length: 7,
+            text: 'täglich',
+          },
+        },
+      ],
+      [
+        'jeden tag',
+        {
+          schedule: {
+            repeatFrequency: 'P1D',
+            startDate: TODAY_AS_ISO,
+          },
+          match: {
+            index: 0,
+            length: 9,
+            text: 'jeden tag',
+          },
+        },
+      ],
+    ]
+
+    it.each(TEST_CASES)('parses "%s"', (input, output) => {
+      expect(parseSchedule(input as string, { locales: ['de'] })).toEqual(
+        output
+      )
     })
   })
 

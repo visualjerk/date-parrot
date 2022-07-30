@@ -92,10 +92,10 @@ const UNIT_WORDS: StringDef[] = [
   ['sekunden?', 's'],
   ['minuten?', 'm'],
   ['stunden?', 'h'],
-  ['tagen?', 'D'],
+  ['tag[e|en]?', 'D'],
   ['wochen?', 'W'],
-  ['monaten?', 'M'],
-  ['jahren?', 'Y'],
+  ['monat[e|en]?', 'M'],
+  ['jahr[e|en]?', 'Y'],
 ]
 
 export const de = {

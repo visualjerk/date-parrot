@@ -40,7 +40,7 @@ const SINGLE_DAY_WORDS: EnumDef[] = [
   ['yesterday', -1],
 ]
 
-const ENUM_SUFFIX = 'th'
+const ENUM_SUFFIX = 'th|st|nd|rd'
 
 const ENUM_WORDS: EnumDef[] = [
   ['first', 1],
@@ -84,10 +84,6 @@ const ENUM_WORDS: EnumDef[] = [
   ['twentyeight', 28],
   ['twentynine', 29],
   ['thirty', 30],
-  //
-  ['1st', 1],
-  ['2nd', 2],
-  ['3rd', 3],
 ]
 
 const UNIT_WORDS: StringDef[] = [
