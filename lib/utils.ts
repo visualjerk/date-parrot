@@ -1,4 +1,11 @@
-import { addWeeks, addYears, isBefore, setDay, setMonth } from 'date-fns'
+import {
+  addWeeks,
+  addYears,
+  isBefore,
+  isPast,
+  setDay,
+  setMonth,
+} from 'date-fns'
 import { EnumDef, StringDef } from './types'
 
 type TValue<TDef extends EnumDef | StringDef | string> = TDef extends string
@@ -58,7 +65,7 @@ export const onClosingWordMatch = buildWordMatcher(
  */
 export function getNextDayOccurrence(date: Date, day: number): Date {
   let result = setDay(date, day, { weekStartsOn: 1 })
-  if (isBefore(result, date)) {
+  if (isBefore(result, date) || isPast(result)) {
     result = addWeeks(result, 1)
   }
   return result
@@ -72,7 +79,7 @@ export function getNextDayOccurrence(date: Date, day: number): Date {
  */
 export function getNextMonthOccurrence(date: Date, month: number): Date {
   let result = setMonth(date, month)
-  if (isBefore(result, date)) {
+  if (isBefore(result, date) || isPast(result)) {
     result = addYears(result, 1)
   }
   return result

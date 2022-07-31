@@ -1,4 +1,4 @@
-import { addDays, formatISO, setDate } from 'date-fns'
+import { addDays, addMonths, formatISO, setDate } from 'date-fns'
 import { LocaleConfig, locales } from './locales'
 import { ParserConfig } from './types'
 import {
@@ -70,7 +70,6 @@ function parseWithLocale(
     DATE_NEXT_TRIGGER_WORDS,
     input,
     (matchIndex, matchText) => {
-      date = addDays(date, 1)
       index = matchIndex
       text = matchText
       input = input.substring(index + text.length)
@@ -84,6 +83,9 @@ function parseWithLocale(
     DAY_OF_WEEK_WORDS,
     input,
     (matchIndex, matchText, value) => {
+      if (nextTriggerWordMatch) {
+        date = addDays(date, 1)
+      }
       index = index == null ? matchIndex : index
       text = `${text}${matchText}`
       date = getNextDayOccurrence(date, value)
@@ -101,7 +103,8 @@ function parseWithLocale(
     (matchIndex, matchText, value) => {
       index = index == null ? matchIndex : index
       text = `${text}${matchText}`
-      date = setDate(getNextMonthOccurrence(date, value - 1), 1)
+      date = setDate(date, 1)
+      date = getNextMonthOccurrence(date, value - 1)
     }
   )
 

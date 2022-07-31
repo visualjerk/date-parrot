@@ -2,8 +2,23 @@ import { describe, it, beforeEach, expect, vi } from 'vitest'
 import { formatISO, addDays } from 'date-fns'
 import { parseDate, ParseDateResult } from '../lib'
 
-const TODAY = new Date('2022-02-04')
+const TODAY = new Date('2022-02-04 01:00:00')
 const TODAY_AS_ISO = formatISO(TODAY)
+
+function createResult(
+  date: Date,
+  text: string,
+  index: number = 0
+): ParseDateResult {
+  return {
+    date: formatISO(date),
+    match: {
+      index,
+      length: text.length,
+      text,
+    },
+  }
+}
 
 describe('parseDate', () => {
   beforeEach(() => {
