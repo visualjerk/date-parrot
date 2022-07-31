@@ -2,6 +2,8 @@
 import ParrotPlayground from './components/ParrotPlayground.vue'
 </script>
 
+<img src="/parrot.png" alt="Parrot" class="h-40 mb-4" />
+
 # DateParrot
 
 DateParrot parses natural language into a [unified schedule object](https://schema.org/Schedule) or ISO date.
@@ -93,3 +95,5 @@ parseDate('lass uns morgen ausgehen', { locales: ['de'] })
 //   },
 // }
 ```
+
+Parrot icon is provided by the awesome [AnimalJamSrchives](https://www.animaljamarchives.com/).

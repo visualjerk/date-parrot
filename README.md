@@ -1,3 +1,5 @@
+![](./docs/parrot.png | width=200)
+
 # DateParrot
 
 DateParrot parses natural language into a [unified schedule object](https://schema.org/Schedule) or ISO date.
