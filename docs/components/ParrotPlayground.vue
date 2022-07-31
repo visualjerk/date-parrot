@@ -50,7 +50,6 @@ const textParts = computed(() => {
     <div class="relative mb-6">
       <input
         v-model="text"
-        autofocus
         class="border border-solid border-white shadow-md bg-slate-50 rounded-lg w-full p-4 text-xl focus:outline focus:outline-4 focus:outline-pink-400 focus:bg-white font-extrabold text-transparent caret-slate-800"
       />
       <div
