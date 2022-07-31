@@ -2,15 +2,36 @@ import { describe, it, beforeEach, expect, vi } from 'vitest'
 import { formatISO, addDays } from 'date-fns'
 import { parseDate, ParseDateResult } from '../lib'
 
+type TestCase = [string | null, null | Date, string?, number?]
+
 const TODAY = new Date('2022-02-04 01:00:00')
-const TODAY_AS_ISO = formatISO(TODAY)
+
+function createParseResult(
+  input: string | null,
+  date: Date | null,
+  text = input || '',
+  index = 0
+): ParseDateResult | null {
+  const output =
+    date === null
+      ? null
+      : {
+          date: formatISO(date),
+          match: {
+            index,
+            length: text.length,
+            text,
+          },
+        }
+  return output
+}
 
 describe('parseDate', () => {
   beforeEach(() => {
     vi.useFakeTimers().setSystemTime(TODAY)
   })
 
-  const TEST_CASES: [string | null, null | Date, string?, number?][] = [
+  const TEST_CASES: TestCase[] = [
     [null, null],
     ['', null],
     ['hello', null],
@@ -33,93 +54,32 @@ describe('parseDate', () => {
     ['next february', new Date('2023-02-01 01:00:00')],
   ]
 
-  it.each(TEST_CASES)(
-    'parses "%s"',
-    (input, date, text = input || '', index = 0) => {
-      const output =
-        date === null
-          ? null
-          : {
-              date: formatISO(date),
-              match: {
-                index,
-                length: text.length,
-                text,
-              },
-            }
-      expect(parseDate(input as string)).toEqual(output)
-    }
-  )
+  it.each(TEST_CASES)('parses "%s"', (input, ...testCase) => {
+    const output = createParseResult(input, ...testCase)
+    expect(parseDate(input as string)).toEqual(output)
+  })
 
   describe('german', () => {
-    const TEST_CASES: [string | null, ParseDateResult | null][] = [
-      [
-        'heute',
-        {
-          date: TODAY_AS_ISO,
-          match: {
-            index: 0,
-            length: 5,
-            text: 'heute',
-          },
-        },
-      ],
-      [
-        'morgen',
-        {
-          date: formatISO(addDays(TODAY, 1)),
-          match: {
-            index: 0,
-            length: 6,
-            text: 'morgen',
-          },
-        },
-      ],
-      [
-        'übermorgen',
-        {
-          date: formatISO(addDays(TODAY, 2)),
-          match: {
-            index: 0,
-            length: 10,
-            text: 'übermorgen',
-          },
-        },
-      ],
+    const TEST_CASES: TestCase[] = [
+      ['heute', TODAY],
+      ['morgen', addDays(TODAY, 1)],
+      ['übermorgen', addDays(TODAY, 2)],
     ]
 
-    it.each(TEST_CASES)('parses "%s"', (input, output) => {
+    it.each(TEST_CASES)('parses "%s"', (input, ...testCase) => {
+      const output = createParseResult(input, ...testCase)
       expect(parseDate(input as string, { locales: ['de'] })).toEqual(output)
     })
   })
 
   describe('mixed locales', () => {
-    const TEST_CASES: [string | null, ParseDateResult | null][] = [
-      [
-        'heute',
-        {
-          date: TODAY_AS_ISO,
-          match: {
-            index: 0,
-            length: 5,
-            text: 'heute',
-          },
-        },
-      ],
-      [
-        'today',
-        {
-          date: TODAY_AS_ISO,
-          match: {
-            index: 0,
-            length: 5,
-            text: 'today',
-          },
-        },
-      ],
+    const TEST_CASES: TestCase[] = [
+      ['heute', TODAY],
+      ['today', TODAY],
     ]
 
-    it.each(TEST_CASES)('parses "%s"', (input, output) => {
+    it.each(TEST_CASES)('parses "%s"', (input, ...testCase) => {
+      const output = createParseResult(input, ...testCase)
       expect(parseDate(input as string, { locales: ['en', 'de'] })).toEqual(
         output
       )
