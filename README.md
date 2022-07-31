@@ -1,4 +1,4 @@
-![](./docs/parrot.png | width=200)
+<img src="./docs/parrot.png" alt="Parrot" width="200" />
 
 # DateParrot
 
