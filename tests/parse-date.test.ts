@@ -72,6 +72,39 @@ describe('parseDate', () => {
         },
       },
     ],
+    [
+      'friday',
+      {
+        date: TODAY_AS_ISO,
+        match: {
+          index: 0,
+          length: 6,
+          text: 'friday',
+        },
+      },
+    ],
+    [
+      'saturday',
+      {
+        date: formatISO(addDays(TODAY, 1)),
+        match: {
+          index: 0,
+          length: 8,
+          text: 'saturday',
+        },
+      },
+    ],
+    [
+      'monday',
+      {
+        date: formatISO(addDays(TODAY, 3)),
+        match: {
+          index: 0,
+          length: 6,
+          text: 'monday',
+        },
+      },
+    ],
   ]
 
   it.each(TEST_CASES)('parses "%s"', (input, output) => {

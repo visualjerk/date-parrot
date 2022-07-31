@@ -1,12 +1,4 @@
-import {
-  setDay,
-  setDate,
-  setMonth,
-  addWeeks,
-  addYears,
-  isPast,
-  formatISO,
-} from 'date-fns'
+import { setDate, setMonth, addYears, isPast, formatISO } from 'date-fns'
 import { DayOfWeek, Month, ParserConfig } from './types'
 import { locales } from './locales'
 import {
@@ -14,6 +6,7 @@ import {
   onTriggerWordMatch,
   onMiddleWordMatch,
   onClosingWordMatch,
+  getNextDayOccurrence,
 } from './utils'
 
 /**
@@ -153,10 +146,7 @@ export function parseSchedule(
         (_, matchText, value) => {
           repeatFrequency = `${repeatFrequency}W`
           byDay = value
-          startDate = setDay(startDate, byDay, { weekStartsOn: 1 })
-          if (isPast(startDate)) {
-            startDate = addWeeks(startDate, 1)
-          }
+          startDate = getNextDayOccurrence(startDate, byDay)
           text = `${text}${matchText}`
         }
       )

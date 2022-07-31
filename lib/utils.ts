@@ -1,3 +1,4 @@
+import { addWeeks, isPast, setDay } from 'date-fns'
 import { EnumDef, StringDef } from './types'
 
 type TValue<TDef extends EnumDef | StringDef | string> = TDef extends string
@@ -45,3 +46,17 @@ export const onMiddleWordMatch = buildWordMatcher(
 export const onClosingWordMatch = buildWordMatcher(
   (word) => new RegExp(`^${word}(?=$| )`, 'i')
 )
+
+/**
+ * Get the next occurrence of a day today or in the future
+ *
+ * @param date The date to set the day of the week to
+ * @param day The number of the week day
+ */
+export function getNextDayOccurrence(date: Date, day: number): Date {
+  let result = setDay(date, day, { weekStartsOn: 1 })
+  if (isPast(result)) {
+    result = addWeeks(result, 1)
+  }
+  return result
+}
