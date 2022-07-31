@@ -48,12 +48,13 @@ const textParts = computed(() => {
     class="md:-mx-8 lg:-mx-12 p-6 lg:p-12 shadow-lg rounded-lg bg-gradient-to-br from-green-50 to-indigo-100 border-4 border-white dark:border-purple-800 dark:from-purple-900 dark:to-indigo-800 dark:shadow-purple-900 text-slate-800"
   >
     <div class="relative mb-6">
-      <input
+      <textarea
         v-model="text"
-        class="border border-solid border-white shadow-md bg-slate-50 rounded-lg w-full p-4 text-xl focus:outline focus:outline-4 focus:outline-pink-400 focus:bg-white font-extrabold text-transparent caret-slate-800"
+        class="border border-solid border-white shadow-md bg-slate-50 rounded-lg w-full p-4 text-xl focus:outline focus:outline-4 focus:outline-pink-400 focus:bg-white font-extrabold text-transparent caret-slate-800 absolute inset-0 resize-none"
+        rows="1"
       />
       <div
-        class="border border-transparent absolute inset-0 pointer-events-none p-4 text-xl font-extrabold whitespace-pre text-slate-700"
+        class="border border-transparent pointer-events-none p-4 text-xl font-extrabold whitespace-pre-wrap text-slate-700 relative"
       >
         <template v-for="part in textParts">
           <span v-if="part.isSchedule" class="text-pink-500">
@@ -63,6 +64,7 @@ const textParts = computed(() => {
             {{ part.value }}
           </span>
         </template>
+        &nbsp;
       </div>
     </div>
     <div class="language-ts">

@@ -20,9 +20,9 @@ export const buildWordMatcher = (regexBuilder: (word: string) => RegExp) =>
         let index = match.index || 0
         let text = match[0]
         // Needed as long as lookbehind is not supported by all browsers
-        // Later on we can use (?<=^| ) as the boundary for the start of a word
+        // Later on we can use (?<=^|\\s) as the boundary for the start of a word
         // Word boundary \b is no option, as it does not match umlauts (e.g. "ü,ö")
-        if (match[0].startsWith(' ')) {
+        if (match[0][0].match(/\s/)) {
           index++
           text = text.slice(1)
         }
@@ -34,8 +34,8 @@ export const buildWordMatcher = (regexBuilder: (word: string) => RegExp) =>
     })
   }
 
-const triggerBoundary = '(?:^| )'
-const closingBoundary = '(?=$|[ .,;:!?])'
+const triggerBoundary = '(?:^|\\s)'
+const closingBoundary = '(?=$|[\\s.,;:!?])'
 
 export const onSingleWordMatch = buildWordMatcher(
   (word) => new RegExp(`${triggerBoundary}${word}${closingBoundary}`, 'i')

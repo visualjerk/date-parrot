@@ -434,12 +434,25 @@ describe('parseSchedule', () => {
   })
 
   describe('word boundaries', () => {
-    const TEST_CASES: string[] = '.,;:!?'.split('')
+    const TEST_CASES_TRIGGER: string[] = ' \n\t'.split('')
 
-    it.each(TEST_CASES)('respects "%s"', (boundary, output) => {
-      const input = `every day${boundary}`
-      expect(parseSchedule(input)).toBeTruthy()
-    })
+    it.each(TEST_CASES_TRIGGER)(
+      'respects "%s" as trigger boundary',
+      (boundary) => {
+        const input = `${boundary}every day`
+        expect(parseSchedule(input)).toBeTruthy()
+      }
+    )
+
+    const TEST_CASES_CLOSING: string[] = ' .,;:!?\n\t'.split('')
+
+    it.each(TEST_CASES_CLOSING)(
+      'respects "%s" as closing boundary',
+      (boundary) => {
+        const input = `every day${boundary}`
+        expect(parseSchedule(input)).toBeTruthy()
+      }
+    )
   })
 
   describe('german', () => {
