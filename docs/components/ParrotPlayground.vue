@@ -7,7 +7,7 @@ interface InputPart {
   isSchedule?: boolean
 }
 
-const text = ref('I eat pizza every second friday, yummi')
+const text = ref('I eat pizza every second friday')
 const parsedSchedule = computed(() => parseSchedule(text.value))
 
 const textParts = computed(() => {
