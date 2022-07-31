@@ -1,5 +1,5 @@
 import { addDays, formatISO } from 'date-fns'
-import { locales } from './locales'
+import { LocaleConfig, locales } from './locales'
 import { ParserConfig } from './types'
 import {
   onSingleWordMatch,
@@ -20,6 +20,78 @@ export interface ParseDateResult {
   }
 }
 
+function parseWithLocale(
+  input: string,
+  localeConfig: LocaleConfig
+): ParseDateResult | null {
+  const { SINGLE_DAY_WORDS, DAY_OF_WEEK_WORDS, DATE_NEXT_TRIGGER_WORDS } =
+    localeConfig
+
+  let date = new Date()
+  let index: number | undefined
+  let text = ''
+
+  function createReturn(): ParseDateResult | null {
+    if (index == null) {
+      return null
+    }
+    return {
+      date: formatISO(date),
+      match: {
+        index,
+        length: text.length,
+        text,
+      },
+    }
+  }
+
+  // See if we have a single word like "today"
+  const singleWordMatch = onSingleWordMatch(
+    SINGLE_DAY_WORDS,
+    input,
+    (matchIndex, matchText, value) => {
+      index = matchIndex
+      text = matchText
+      date = addDays(date, value)
+    }
+  )
+
+  if (singleWordMatch) {
+    return createReturn()
+  }
+
+  // See if we have a single week day like "monday"
+  const nextTriggerWordMatch = onTriggerWordMatch(
+    DATE_NEXT_TRIGGER_WORDS,
+    input,
+    (matchIndex, matchText) => {
+      date = addDays(date, 1)
+      index = matchIndex
+      text = matchText
+      input = input.substring(index + text.length)
+    }
+  )
+
+  const onMatch = nextTriggerWordMatch ? onClosingWordMatch : onSingleWordMatch
+
+  // See if we have a single week day like "monday"
+  const weekDayMatch = onMatch(
+    DAY_OF_WEEK_WORDS,
+    input,
+    (matchIndex, matchText, value) => {
+      index = index == null ? matchIndex : index
+      text = `${text}${matchText}`
+      date = getNextDayOccurrence(date, value)
+    }
+  )
+
+  if (weekDayMatch) {
+    return createReturn()
+  }
+
+  return null
+}
+
 export function parseDate(
   input: string,
   config: ParserConfig = { locales: ['en'] }
@@ -30,60 +102,10 @@ export function parseDate(
 
   const localeConfigs = config.locales.map((key) => locales[key])
 
-  for (const config of localeConfigs) {
-    const { SINGLE_DAY_WORDS, DAY_OF_WEEK_WORDS, DATE_NEXT_TRIGGER_WORDS } =
-      config
-
-    let date = new Date()
-    let index: number | undefined
-    let text = ''
-
-    // See if we have a single word like "today"
-    const singleWordMatch = onSingleWordMatch(
-      SINGLE_DAY_WORDS,
-      input,
-      (matchIndex, matchText, value) => {
-        index = matchIndex
-        text = matchText
-        date = addDays(date, value)
-      }
-    )
-
-    // See if we have a single week day like "monday"
-    if (!singleWordMatch) {
-      const nextTriggerWordMatch = onTriggerWordMatch(
-        DATE_NEXT_TRIGGER_WORDS,
-        input,
-        (matchIndex, matchText) => {
-          date = addDays(date, 1)
-          index = matchIndex
-          text = matchText
-          input = input.substring(index + text.length)
-        }
-      )
-
-      const onMatch = nextTriggerWordMatch
-        ? onClosingWordMatch
-        : onSingleWordMatch
-
-      // See if we have a single week day like "monday"
-      onMatch(DAY_OF_WEEK_WORDS, input, (matchIndex, matchText, value) => {
-        index = index == null ? matchIndex : index
-        text = `${text}${matchText}`
-        date = getNextDayOccurrence(date, value)
-      })
-    }
-
-    if (text !== '' && index != null) {
-      const output: ParseDateResult = {
-        date: formatISO(date),
-        match: {
-          index,
-          length: text.length,
-          text,
-        },
-      }
-      return output
+  for (const localeConfig of localeConfigs) {
+    const result = parseWithLocale(input, localeConfig)
+    if (result) {
+      return result
     }
   }
   return null
