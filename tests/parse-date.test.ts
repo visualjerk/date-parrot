@@ -62,6 +62,15 @@ describe('parseDate', () => {
     ['january', new Date('2023-01-01 01:00:00')],
     ['february', new Date('2023-02-01 01:00:00')],
     ['next february', new Date('2023-02-01 01:00:00')],
+    ['3. february', new Date('2023-02-03 01:00:00')],
+    ['4. february', new Date('2022-02-04 01:00:00')],
+    ['11. february', new Date('2022-02-11 01:00:00')],
+    ['11st february', new Date('2022-02-11 01:00:00')],
+    ['22nd february', new Date('2022-02-22 01:00:00')],
+    ['23nd february', new Date('2022-02-23 01:00:00')],
+    ['28th february', new Date('2022-02-28 01:00:00')],
+    ['february 3.', new Date('2023-02-03 01:00:00')],
+    // ['february 28th', new Date('2022-02-28 01:00:00')],
   ]
   expectTestCasesToSucceed(TEST_CASES)
 
