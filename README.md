@@ -77,7 +77,7 @@ It takes an array of locale identifiers (e.g. `['en', 'de']`).
 ```ts
 import { parseDate } from 'date-parrot'
 
-parseDate('lass uns morgen ausgehen', { locales: ['de']' })
+parseDate('lass uns morgen ausgehen', { locales: ['de'] })
 
 // =>
 // {
