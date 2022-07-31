@@ -17,7 +17,14 @@ export const buildWordMatcher = (regexBuilder: (word: string) => RegExp) =>
       const match = input.match(regexBuilder(word))
       if (match && match[0]) {
         let index = match.index || 0
-        const text = match[0]
+        let text = match[0]
+        // Needed as long as lookbehind is not supported by all browsers
+        // Later on we can use (?<=^| ) as the boundary for the start of a word
+        // Word boundary \b is no option, as it does not match umlauts (e.g. "ü,ö")
+        if (match[0].startsWith(' ')) {
+          index++
+          text = text.slice(1)
+        }
         // The type guard above ensures this is a string or the value of definition
         onMatch(index, text, value as TValue<TDef>)
         return true
@@ -27,14 +34,14 @@ export const buildWordMatcher = (regexBuilder: (word: string) => RegExp) =>
   }
 
 export const onSingleWordMatch = buildWordMatcher(
-  (word) => new RegExp(`\\b${word}\\b`, 'i')
+  (word) => new RegExp(`(?:^| )${word}(?=$| )`, 'i')
 )
 export const onTriggerWordMatch = buildWordMatcher(
-  (word) => new RegExp(`\\b${word} `, 'i')
+  (word) => new RegExp(`(?:^| )${word} `, 'i')
 )
 export const onMiddleWordMatch = buildWordMatcher(
   (word) => new RegExp(`^${word} `, 'i')
 )
 export const onClosingWordMatch = buildWordMatcher(
-  (word) => new RegExp(`^${word}\\b`, 'i')
+  (word) => new RegExp(`^${word}(?=$| )`, 'i')
 )

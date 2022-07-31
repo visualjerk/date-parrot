@@ -102,6 +102,17 @@ describe('parseDate', () => {
           },
         },
       ],
+      [
+        'übermorgen',
+        {
+          date: formatISO(addDays(TODAY, 2)),
+          match: {
+            index: 0,
+            length: 10,
+            text: 'übermorgen',
+          },
+        },
+      ],
     ]
 
     it.each(TEST_CASES)('parses "%s"', (input, output) => {
