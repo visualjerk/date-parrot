@@ -41,20 +41,20 @@ export const buildWordMatcher = (regexBuilder: (word: string) => RegExp) =>
     })
   }
 
-const triggerBoundary = '(?:^|\\s)'
-const closingBoundary = '(?=$|[\\s.,;:!?])'
+export const TRIGGER_BOUNDARY = '(?:^|\\s)'
+export const CLOSING_BOUNDARY = '(?=$|[\\s.,;:!?])'
 
 export const onSingleWordMatch = buildWordMatcher(
-  (word) => new RegExp(`${triggerBoundary}${word}${closingBoundary}`, 'i')
+  (word) => new RegExp(`${TRIGGER_BOUNDARY}${word}${CLOSING_BOUNDARY}`, 'i')
 )
 export const onTriggerWordMatch = buildWordMatcher(
-  (word) => new RegExp(`${triggerBoundary}${word} `, 'i')
+  (word) => new RegExp(`${TRIGGER_BOUNDARY}${word} `, 'i')
 )
 export const onMiddleWordMatch = buildWordMatcher(
   (word) => new RegExp(`^${word} `, 'i')
 )
 export const onClosingWordMatch = buildWordMatcher(
-  (word) => new RegExp(`^${word}${closingBoundary}`, 'i')
+  (word) => new RegExp(`^${word}${CLOSING_BOUNDARY}`, 'i')
 )
 
 /**

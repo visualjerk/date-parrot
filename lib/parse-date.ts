@@ -7,6 +7,7 @@ import {
   getNextMonthOccurrence,
   onTriggerWordMatch,
   onClosingWordMatch,
+  TRIGGER_BOUNDARY,
 } from './utils'
 
 export interface ParseDateResult {
@@ -96,8 +97,17 @@ function parseWithLocale(
 
   // See if we have an enumaration like "2", "4.", "20th", etc.
   let dayOfMonth: number | undefined
-  const match = input.match(new RegExp(`^(\\d+)(${ENUM_SUFFIX}|\\.)? `, 'i'))
+  const match = input.match(
+    new RegExp(`${TRIGGER_BOUNDARY}(\\d+)(${ENUM_SUFFIX}|\\.)? `, 'i')
+  )
   if (match && match[0]) {
+    if (index == null) {
+      index = match.index || 0
+    }
+    if (match[0][0].match(/\s/)) {
+      index++
+      match[0] = match[0].slice(1)
+    }
     dayOfMonth = Number(match[1])
     text = `${text}${match[0]}`
     input = input.slice(match[0].length)

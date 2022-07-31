@@ -65,6 +65,7 @@ describe('parseDate', () => {
     ['february', new Date('2023-02-01 01:00:00')],
     ['next february', new Date('2023-02-01 01:00:00')],
     ['3. february', new Date('2023-02-03 01:00:00')],
+    ['workout 3. february', new Date('2023-02-03 01:00:00'), '3. february', 8],
     ['4. february', new Date('2022-02-04 01:00:00')],
     ['11. february', new Date('2022-02-11 01:00:00')],
     ['11st february', new Date('2022-02-11 01:00:00')],
