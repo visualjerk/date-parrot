@@ -1,9 +1,10 @@
-import { addDays, formatISO } from 'date-fns'
+import { addDays, formatISO, setDate } from 'date-fns'
 import { LocaleConfig, locales } from './locales'
 import { ParserConfig } from './types'
 import {
   onSingleWordMatch,
   getNextDayOccurrence,
+  getNextMonthOccurrence,
   onTriggerWordMatch,
   onClosingWordMatch,
 } from './utils'
@@ -24,8 +25,12 @@ function parseWithLocale(
   input: string,
   localeConfig: LocaleConfig
 ): ParseDateResult | null {
-  const { SINGLE_DAY_WORDS, DAY_OF_WEEK_WORDS, DATE_NEXT_TRIGGER_WORDS } =
-    localeConfig
+  const {
+    SINGLE_DAY_WORDS,
+    DAY_OF_WEEK_WORDS,
+    DATE_NEXT_TRIGGER_WORDS,
+    MONTH_WORDS,
+  } = localeConfig
 
   let date = new Date()
   let index: number | undefined
@@ -86,6 +91,21 @@ function parseWithLocale(
   )
 
   if (weekDayMatch) {
+    return createReturn()
+  }
+
+  // See if we have a single month like "june"
+  const monthMatch = onMatch(
+    MONTH_WORDS,
+    input,
+    (matchIndex, matchText, value) => {
+      index = index == null ? matchIndex : index
+      text = `${text}${matchText}`
+      date = setDate(getNextMonthOccurrence(date, value - 1), 1)
+    }
+  )
+
+  if (monthMatch) {
     return createReturn()
   }
 

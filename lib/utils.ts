@@ -1,4 +1,4 @@
-import { addWeeks, isBefore, setDay } from 'date-fns'
+import { addWeeks, addYears, isBefore, setDay, setMonth } from 'date-fns'
 import { EnumDef, StringDef } from './types'
 
 type TValue<TDef extends EnumDef | StringDef | string> = TDef extends string
@@ -60,6 +60,20 @@ export function getNextDayOccurrence(date: Date, day: number): Date {
   let result = setDay(date, day, { weekStartsOn: 1 })
   if (isBefore(result, date)) {
     result = addWeeks(result, 1)
+  }
+  return result
+}
+
+/**
+ * Get the next occurrence of a month now or in the future
+ *
+ * @param date The reference date to start from
+ * @param month The number of the month
+ */
+export function getNextMonthOccurrence(date: Date, month: number): Date {
+  let result = setMonth(date, month)
+  if (isBefore(result, date)) {
+    result = addYears(result, 1)
   }
   return result
 }
