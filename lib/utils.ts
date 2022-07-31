@@ -34,17 +34,20 @@ export const buildWordMatcher = (regexBuilder: (word: string) => RegExp) =>
     })
   }
 
+const triggerBoundary = '(?:^| )'
+const closingBoundary = '(?=$|[ .,;:!?])'
+
 export const onSingleWordMatch = buildWordMatcher(
-  (word) => new RegExp(`(?:^| )${word}(?=$| )`, 'i')
+  (word) => new RegExp(`${triggerBoundary}${word}${closingBoundary}`, 'i')
 )
 export const onTriggerWordMatch = buildWordMatcher(
-  (word) => new RegExp(`(?:^| )${word} `, 'i')
+  (word) => new RegExp(`${triggerBoundary}${word} `, 'i')
 )
 export const onMiddleWordMatch = buildWordMatcher(
   (word) => new RegExp(`^${word} `, 'i')
 )
 export const onClosingWordMatch = buildWordMatcher(
-  (word) => new RegExp(`^${word}(?=$| )`, 'i')
+  (word) => new RegExp(`^${word}${closingBoundary}`, 'i')
 )
 
 /**

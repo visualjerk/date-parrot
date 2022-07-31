@@ -433,6 +433,15 @@ describe('parseSchedule', () => {
     })
   })
 
+  describe('word boundaries', () => {
+    const TEST_CASES: string[] = '.,;:!?'.split('')
+
+    it.each(TEST_CASES)('respects "%s"', (boundary, output) => {
+      const input = `every day${boundary}`
+      expect(parseSchedule(input)).toBeTruthy()
+    })
+  })
+
   describe('german', () => {
     const TEST_CASES: [string | null, ParseScheduleResult | null][] = [
       [
