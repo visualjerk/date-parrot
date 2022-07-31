@@ -1,4 +1,4 @@
-<img src="./docs/parrot.png" alt="Parrot" height="160" />
+<img src="./docs/public/parrot.png" alt="Parrot" height="160" />
 
 # DateParrot
 
