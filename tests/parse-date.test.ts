@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
 import { formatISO, addDays } from 'date-fns'
-import { parseDate, ParseDateResult } from '../lib'
+import { parseDate, ParseDateResult, ParserConfig } from '../lib'
 
 type TestCase = [string | null, null | Date, string?, number?]
 
@@ -24,6 +24,16 @@ function createParseResult(
           },
         }
   return output
+}
+
+function expectTestCasesToSucceed(
+  testCases: TestCase[],
+  config?: ParserConfig
+) {
+  it.each(testCases)('parses "%s"', (input, ...testCase) => {
+    const output = createParseResult(input, ...testCase)
+    expect(parseDate(input as string, config)).toEqual(output)
+  })
 }
 
 describe('parseDate', () => {
@@ -53,11 +63,7 @@ describe('parseDate', () => {
     ['february', new Date('2023-02-01 01:00:00')],
     ['next february', new Date('2023-02-01 01:00:00')],
   ]
-
-  it.each(TEST_CASES)('parses "%s"', (input, ...testCase) => {
-    const output = createParseResult(input, ...testCase)
-    expect(parseDate(input as string)).toEqual(output)
-  })
+  expectTestCasesToSucceed(TEST_CASES)
 
   describe('german', () => {
     const TEST_CASES: TestCase[] = [
@@ -65,11 +71,7 @@ describe('parseDate', () => {
       ['morgen', addDays(TODAY, 1)],
       ['übermorgen', addDays(TODAY, 2)],
     ]
-
-    it.each(TEST_CASES)('parses "%s"', (input, ...testCase) => {
-      const output = createParseResult(input, ...testCase)
-      expect(parseDate(input as string, { locales: ['de'] })).toEqual(output)
-    })
+    expectTestCasesToSucceed(TEST_CASES, { locales: ['de'] })
   })
 
   describe('mixed locales', () => {
@@ -77,12 +79,6 @@ describe('parseDate', () => {
       ['heute', TODAY],
       ['today', TODAY],
     ]
-
-    it.each(TEST_CASES)('parses "%s"', (input, ...testCase) => {
-      const output = createParseResult(input, ...testCase)
-      expect(parseDate(input as string, { locales: ['en', 'de'] })).toEqual(
-        output
-      )
-    })
+    expectTestCasesToSucceed(TEST_CASES, { locales: ['en', 'de'] })
   })
 })
