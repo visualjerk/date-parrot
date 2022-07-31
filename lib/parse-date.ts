@@ -96,7 +96,7 @@ function parseWithLocale(
 
   // See if we have an enumaration like "2", "4.", "20th", etc.
   let dayOfMonth: number | undefined
-  const match = input.match(new RegExp(`^(\\d+)(${ENUM_SUFFIX}|.)? `, 'i'))
+  const match = input.match(new RegExp(`^(\\d+)(${ENUM_SUFFIX}|\\.)? `, 'i'))
   if (match && match[0]) {
     dayOfMonth = Number(match[1])
     text = `${text}${match[0]}`
@@ -123,7 +123,7 @@ function parseWithLocale(
 
   // Look for an enum behind the month (e.g. "june 3th")
   const postEnumMatch = input.match(
-    new RegExp(`^ (\\d+)(${ENUM_SUFFIX}|.)?(?=$|\\s)`, 'i')
+    new RegExp(`^ (\\d+)(${ENUM_SUFFIX}|\\.)?(?=$|\\s)`, 'i')
   )
   if (postEnumMatch && postEnumMatch[0]) {
     dayOfMonth = Number(postEnumMatch[1])

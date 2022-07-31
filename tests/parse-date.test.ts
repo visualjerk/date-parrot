@@ -54,6 +54,8 @@ describe('parseDate', () => {
     ['tomorrow tame a bear', addDays(TODAY, 1), 'tomorrow'],
     ['yesterday', addDays(TODAY, -1)],
     ['friday', TODAY],
+    ['2n friday', TODAY, 'friday', 3],
+    ['friday 2n', TODAY, 'friday'],
     ['saturday', addDays(TODAY, 1)],
     ['monday', addDays(TODAY, 3)],
     ['next saturday', addDays(TODAY, 1)],

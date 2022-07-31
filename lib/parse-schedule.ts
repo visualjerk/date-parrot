@@ -100,7 +100,7 @@ function parseWithLocale(
 
   // See if we have an enumaration like "2", "4.", "20th", etc.
   let enumMatch = false
-  const match = input.match(new RegExp(`^(\\d+)(${ENUM_SUFFIX}|.)? `, 'i'))
+  const match = input.match(new RegExp(`^(\\d+)(${ENUM_SUFFIX}|\\.)? `, 'i'))
   if (match && match[0]) {
     const value = match[1]
     repeatFrequency = `P${value}`
