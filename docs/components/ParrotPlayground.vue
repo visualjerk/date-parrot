@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { parseSchedule, parseDate } from '../../lib'
+import { parseSchedule, parseDate, ParserConfig } from '../../lib'
 
 interface InputPart {
   value: string
@@ -8,9 +8,25 @@ interface InputPart {
   isDate?: boolean
 }
 
+const localeChoices = ['en', 'de'] as const
+const selectedLocales = ref<ParserConfig['locales']>(['en'])
+function localeIsActive(locale: 'de' | 'en') {
+  return selectedLocales.value.includes(locale)
+}
+function toggleLocale(locale: 'de' | 'en') {
+  const index = selectedLocales.value.indexOf(locale)
+  if (index === -1) {
+    selectedLocales.value.push(locale)
+  } else {
+    selectedLocales.value.splice(index, 1)
+  }
+}
+const config = computed<ParserConfig>(() => ({
+  locales: selectedLocales.value,
+}))
 const text = ref('I eat pizza every second friday')
-const parsedSchedule = computed(() => parseSchedule(text.value))
-const parsedDate = computed(() => parseDate(text.value))
+const parsedSchedule = computed(() => parseSchedule(text.value, config.value))
+const parsedDate = computed(() => parseDate(text.value, config.value))
 
 const textParts = computed(() => {
   const value = text.value
@@ -49,8 +65,19 @@ const textParts = computed(() => {
 
 <template>
   <div
-    class="md:-mx-8 lg:-mx-12 p-6 lg:p-12 shadow-lg rounded-lg bg-gradient-to-br from-green-50 to-indigo-100 border-4 border-white dark:border-purple-800 dark:from-purple-900 dark:to-indigo-800 dark:shadow-purple-900 text-slate-800"
+    class="md:-mx-8 lg:-mx-12 p-6 lg:px-12 lg:py-8 shadow-lg rounded-lg bg-gradient-to-br from-green-50 to-indigo-100 border-4 border-white dark:border-purple-800 dark:from-purple-900 dark:to-indigo-800 dark:shadow-purple-900 text-slate-800"
   >
+    <div class="flex justify-end gap-2 mb-4">
+      <button
+        v-for="locale in localeChoices"
+        :key="locale"
+        @click="toggleLocale(locale)"
+        class="px-2 rounded-full text-white font-bold"
+        :class="localeIsActive(locale) ? 'bg-pink-600' : 'bg-purple-400'"
+      >
+        {{ locale }}
+      </button>
+    </div>
     <div class="relative mb-6">
       <textarea
         v-model="text"

@@ -269,6 +269,7 @@ describe('parseSchedule', () => {
         },
       },
     ],
+    // TODO: this should be 2nd of june every year
     [
       'every 2nd june',
       {
