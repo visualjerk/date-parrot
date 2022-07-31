@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { parseSchedule } from '../../lib'
+import { parseSchedule, parseDate } from '../../lib'
 
 interface InputPart {
   value: string
   isSchedule?: boolean
+  isDate?: boolean
 }
 
 const text = ref('I eat pizza every second friday')
 const parsedSchedule = computed(() => parseSchedule(text.value))
+const parsedDate = computed(() => parseDate(text.value))
 
 const textParts = computed(() => {
   const value = text.value
-  const schedule = parseSchedule(value)
-  const match = schedule && schedule.match
+  const schedule = parsedSchedule.value
+  const date = parsedDate.value
+  const match = (schedule && schedule.match) || (date && date.match)
   if (!match) {
     return [
       {
@@ -25,6 +28,7 @@ const textParts = computed(() => {
   const parts: InputPart[] = [
     {
       isSchedule: !!schedule,
+      isDate: !!date,
       value: match.text,
     },
   ]
@@ -52,23 +56,25 @@ const textParts = computed(() => {
         v-model="text"
         class="border border-solid border-white shadow-md bg-slate-50 rounded-lg w-full p-4 text-xl focus:outline focus:outline-4 focus:outline-pink-400 focus:bg-white font-extrabold text-transparent caret-slate-800 absolute inset-0 resize-none"
         rows="1"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        autocomplete="off"
       />
       <div
         class="border border-transparent pointer-events-none p-4 text-xl font-extrabold whitespace-pre-wrap text-slate-700 relative"
       >
-        <template v-for="part in textParts">
-          <span v-if="part.isSchedule" class="text-pink-500">
-            {{ part.value }}
-          </span>
-          <span v-else>
-            {{ part.value }}
-          </span>
-        </template>
+        <span
+          v-for="part in textParts"
+          :class="(part.isSchedule || part.isDate) && 'text-pink-500'"
+        >
+          {{ part.value }}
+        </span>
         &nbsp;
       </div>
     </div>
     <div class="language-ts">
-      <pre><code>{{ parsedSchedule || 'null' }}</code></pre>
+      <pre><code>{{ parsedSchedule || parsedDate || 'null' }}</code></pre>
     </div>
   </div>
 </template>
