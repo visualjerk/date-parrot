@@ -1,4 +1,4 @@
-import { addDays, addMonths, formatISO, setDate } from 'date-fns'
+import { addDays, formatISO, setDate } from 'date-fns'
 import { LocaleConfig, locales } from './locales'
 import { ParserConfig } from './types'
 import {
@@ -9,9 +9,6 @@ import {
   onClosingWordMatch,
 } from './utils'
 
-/**
- * https://schema.org/Schedule
- */
 export interface ParseDateResult {
   date: string
   match: {
