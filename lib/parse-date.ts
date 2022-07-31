@@ -1,7 +1,12 @@
 import { addDays, formatISO } from 'date-fns'
 import { locales } from './locales'
 import { ParserConfig } from './types'
-import { onSingleWordMatch, getNextDayOccurrence } from './utils'
+import {
+  onSingleWordMatch,
+  getNextDayOccurrence,
+  onTriggerWordMatch,
+  onClosingWordMatch,
+} from './utils'
 
 /**
  * https://schema.org/Schedule
@@ -26,14 +31,15 @@ export function parseDate(
   const localeConfigs = config.locales.map((key) => locales[key])
 
   for (const config of localeConfigs) {
-    const { SINGLE_DAY_WORDS, DAY_OF_WEEK_WORDS } = config
+    const { SINGLE_DAY_WORDS, DAY_OF_WEEK_WORDS, DATE_NEXT_TRIGGER_WORDS } =
+      config
 
     let date = new Date()
-    let index = 0
+    let index: number | undefined
     let text = ''
 
     // See if we have a single word like "today"
-    let singleWordMatch = onSingleWordMatch(
+    const singleWordMatch = onSingleWordMatch(
       SINGLE_DAY_WORDS,
       input,
       (matchIndex, matchText, value) => {
@@ -45,18 +51,30 @@ export function parseDate(
 
     // See if we have a single week day like "monday"
     if (!singleWordMatch) {
-      singleWordMatch = onSingleWordMatch(
-        DAY_OF_WEEK_WORDS,
+      const nextTriggerWordMatch = onTriggerWordMatch(
+        DATE_NEXT_TRIGGER_WORDS,
         input,
-        (matchIndex, matchText, value) => {
+        (matchIndex, matchText) => {
+          date = addDays(date, 1)
           index = matchIndex
           text = matchText
-          date = getNextDayOccurrence(date, value)
+          input = input.substring(index + text.length)
         }
       )
+
+      const onMatch = nextTriggerWordMatch
+        ? onClosingWordMatch
+        : onSingleWordMatch
+
+      // See if we have a single week day like "monday"
+      onMatch(DAY_OF_WEEK_WORDS, input, (matchIndex, matchText, value) => {
+        index = index == null ? matchIndex : index
+        text = `${text}${matchText}`
+        date = getNextDayOccurrence(date, value)
+      })
     }
 
-    if (singleWordMatch) {
+    if (text !== '' && index != null) {
       const output: ParseDateResult = {
         date: formatISO(date),
         match: {

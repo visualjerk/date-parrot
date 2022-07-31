@@ -32,7 +32,8 @@ const SCHEDULE_SINGLE_WORDS: StringDef[] = [
   ['jährlich', '1Y'],
 ]
 
-const SCHEDULE_TRIGGER_WORDS = ['jeden', 'jede', 'alle']
+const SCHEDULE_TRIGGER_WORDS = ['jede[rn]?', 'alle']
+const DATE_NEXT_TRIGGER_WORDS = ['nächste[rn]?', 'kommende[rn]?']
 
 const SINGLE_DAY_WORDS: EnumDef[] = [
   ['heute', 0],
@@ -103,6 +104,7 @@ export const de = {
   MONTH_WORDS,
   SCHEDULE_SINGLE_WORDS,
   SCHEDULE_TRIGGER_WORDS,
+  DATE_NEXT_TRIGGER_WORDS,
   SINGLE_DAY_WORDS,
   ENUM_SUFFIX,
   ENUM_WORDS,

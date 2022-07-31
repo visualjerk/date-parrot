@@ -33,6 +33,7 @@ const SCHEDULE_SINGLE_WORDS: StringDef[] = [
   ['yearly', '1Y'],
 ]
 const SCHEDULE_TRIGGER_WORDS = ['every', 'each']
+const DATE_NEXT_TRIGGER_WORDS = ['next', 'coming', 'upcoming']
 
 const SINGLE_DAY_WORDS: EnumDef[] = [
   ['today', 0],
@@ -101,6 +102,7 @@ export const en = {
   MONTH_WORDS,
   SCHEDULE_SINGLE_WORDS,
   SCHEDULE_TRIGGER_WORDS,
+  DATE_NEXT_TRIGGER_WORDS,
   SINGLE_DAY_WORDS,
   ENUM_SUFFIX,
   ENUM_WORDS,

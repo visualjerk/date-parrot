@@ -105,6 +105,28 @@ describe('parseDate', () => {
         },
       },
     ],
+    [
+      'next saturday',
+      {
+        date: formatISO(addDays(TODAY, 1)),
+        match: {
+          index: 0,
+          length: 13,
+          text: 'next saturday',
+        },
+      },
+    ],
+    [
+      'next friday',
+      {
+        date: formatISO(addDays(TODAY, 7)),
+        match: {
+          index: 0,
+          length: 11,
+          text: 'next friday',
+        },
+      },
+    ],
   ]
 
   it.each(TEST_CASES)('parses "%s"', (input, output) => {
