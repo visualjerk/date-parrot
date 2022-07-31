@@ -1,6 +1,6 @@
 import { setDate, setMonth, addYears, isPast, formatISO } from 'date-fns'
 import { DayOfWeek, Month, ParserConfig } from './types'
-import { locales } from './locales'
+import { locales, LocaleConfig } from './locales'
 import {
   onSingleWordMatch,
   onTriggerWordMatch,
@@ -28,155 +28,32 @@ export interface ParseScheduleResult {
   }
 }
 
-export function parseSchedule(
+function parseWithLocale(
   input: string,
-  config: ParserConfig = { locales: ['en'] }
+  localeConfig: LocaleConfig
 ): ParseScheduleResult | null {
-  if (!input) {
-    return null
-  }
+  const {
+    DAY_OF_WEEK_WORDS,
+    MONTH_WORDS,
+    SCHEDULE_TRIGGER_WORDS,
+    SCHEDULE_SINGLE_WORDS,
+    ENUM_WORDS,
+    UNIT_WORDS,
+    ENUM_SUFFIX,
+  } = localeConfig
 
-  const localeConfigs = config.locales.map((key) => locales[key])
+  let repeatFrequency: string | undefined
+  let index = 0
+  let text = ''
+  let byDay: DayOfWeek | undefined
+  let byMonth: Month | undefined
+  let startDate = new Date()
 
-  for (const config of localeConfigs) {
-    const {
-      DAY_OF_WEEK_WORDS,
-      MONTH_WORDS,
-      SCHEDULE_TRIGGER_WORDS,
-      SCHEDULE_SINGLE_WORDS,
-      ENUM_WORDS,
-      UNIT_WORDS,
-      ENUM_SUFFIX,
-    } = config
-
-    let repeatFrequency: string | undefined
-    let index = 0
-    let text = ''
-    let byDay: DayOfWeek | undefined
-    let byMonth: Month | undefined
-    let startDate = new Date()
-
-    // See if we have a single word
-    const singleWordMatch = onSingleWordMatch(
-      SCHEDULE_SINGLE_WORDS,
-      input,
-      (matchIndex, matchText, value) => {
-        index = matchIndex
-        text = matchText
-        repeatFrequency = `P${value}`
-      }
-    )
-
-    if (singleWordMatch && repeatFrequency) {
-      const output: ParseScheduleResult = {
-        schedule: {
-          repeatFrequency,
-          startDate: formatISO(startDate),
-          byDay,
-          byMonth,
-        },
-        match: {
-          index,
-          length: text.length,
-          text,
-        },
-      }
-      return output
-    }
-
-    // See if we have a schedule trigger word
-    const scheduleTriggerMatch = onTriggerWordMatch(
-      SCHEDULE_TRIGGER_WORDS,
-      input,
-      (matchIndex, matchText) => {
-        index = matchIndex
-        text = matchText
-        input = input.slice(index + text.length)
-      }
-    )
-
-    if (!scheduleTriggerMatch) {
-      continue
-    }
-
-    // See if we have an enumaration like "2", "4.", "20th", etc.
-    let enumMatch = false
-    const match = input.match(new RegExp(`^(\\d+)(${ENUM_SUFFIX}|.)? `, 'i'))
-    if (match && match[0]) {
-      const value = match[1]
-      repeatFrequency = `P${value}`
-      text = `${text}${match[0]}`
-      input = input.slice(match[0].length)
-      enumMatch = true
-    }
-
-    // See if we have a distinct enum word like "first", "2nd", etc.
-    if (!enumMatch) {
-      enumMatch = onMiddleWordMatch(
-        ENUM_WORDS,
-        input,
-        (_, matchText, value) => {
-          repeatFrequency = `P${value}`
-          text = `${text}${matchText}`
-          input = input.slice(matchText.length)
-        }
-      )
-    }
-
-    // If we dont't have an enum match, the frequency is set to 1
-    if (!enumMatch) {
-      repeatFrequency = 'P1'
-    }
-
-    // See if we have a unit word like "minute", "hour", etc.
-    const unitWordMatch = onClosingWordMatch(
-      UNIT_WORDS,
-      input,
-      (_, matchText, unit) => {
-        repeatFrequency = `${repeatFrequency}${unit}`
-        text = `${text}${matchText}`
-      }
-    )
-
-    // If we don't have a unit word, see if we have a week day
-    if (!unitWordMatch) {
-      const weekDayMatch = onClosingWordMatch(
-        DAY_OF_WEEK_WORDS,
-        input,
-        (_, matchText, value) => {
-          repeatFrequency = `${repeatFrequency}W`
-          byDay = value
-          startDate = getNextDayOccurrence(startDate, byDay)
-          text = `${text}${matchText}`
-        }
-      )
-      // See if we have a month
-      if (!weekDayMatch) {
-        const monthMatch = onClosingWordMatch(
-          MONTH_WORDS,
-          input,
-          (_, matchText, value) => {
-            repeatFrequency = `${repeatFrequency}Y`
-            byMonth = value
-            startDate = setDate(setMonth(startDate, byMonth - 1), 1)
-            if (isPast(startDate)) {
-              startDate = addYears(startDate, 1)
-            }
-            text = `${text}${matchText}`
-          }
-        )
-
-        if (!monthMatch) {
-          continue
-        }
-      }
-    }
-
+  function createResult(): ParseScheduleResult | null {
     if (!repeatFrequency) {
-      continue
+      return null
     }
-
-    const output: ParseScheduleResult = {
+    return {
       schedule: {
         repeatFrequency,
         startDate: formatISO(startDate),
@@ -189,7 +66,130 @@ export function parseSchedule(
         text,
       },
     }
-    return output
+  }
+
+  // See if we have a single word
+  const singleWordMatch = onSingleWordMatch(
+    SCHEDULE_SINGLE_WORDS,
+    input,
+    (matchIndex, matchText, value) => {
+      index = matchIndex
+      text = matchText
+      repeatFrequency = `P${value}`
+    }
+  )
+
+  if (singleWordMatch) {
+    return createResult()
+  }
+
+  // See if we have a schedule trigger word
+  const scheduleTriggerMatch = onTriggerWordMatch(
+    SCHEDULE_TRIGGER_WORDS,
+    input,
+    (matchIndex, matchText) => {
+      index = matchIndex
+      text = matchText
+      input = input.slice(index + text.length)
+    }
+  )
+
+  if (!scheduleTriggerMatch) {
+    return null
+  }
+
+  // See if we have an enumaration like "2", "4.", "20th", etc.
+  let enumMatch = false
+  const match = input.match(new RegExp(`^(\\d+)(${ENUM_SUFFIX}|.)? `, 'i'))
+  if (match && match[0]) {
+    const value = match[1]
+    repeatFrequency = `P${value}`
+    text = `${text}${match[0]}`
+    input = input.slice(match[0].length)
+    enumMatch = true
+  }
+
+  // See if we have a distinct enum word like "first", "2nd", etc.
+  if (!enumMatch) {
+    enumMatch = onMiddleWordMatch(ENUM_WORDS, input, (_, matchText, value) => {
+      repeatFrequency = `P${value}`
+      text = `${text}${matchText}`
+      input = input.slice(matchText.length)
+    })
+  }
+
+  // If we dont't have an enum match, the frequency is set to 1
+  if (!enumMatch) {
+    repeatFrequency = 'P1'
+  }
+
+  // See if we have a unit word like "minute", "hour", etc.
+  const unitWordMatch = onClosingWordMatch(
+    UNIT_WORDS,
+    input,
+    (_, matchText, unit) => {
+      repeatFrequency = `${repeatFrequency}${unit}`
+      text = `${text}${matchText}`
+    }
+  )
+
+  if (unitWordMatch) {
+    return createResult()
+  }
+
+  // If we don't have a unit word, see if we have a week day
+  const weekDayMatch = onClosingWordMatch(
+    DAY_OF_WEEK_WORDS,
+    input,
+    (_, matchText, value) => {
+      repeatFrequency = `${repeatFrequency}W`
+      byDay = value
+      startDate = getNextDayOccurrence(startDate, byDay)
+      text = `${text}${matchText}`
+    }
+  )
+
+  if (weekDayMatch) {
+    return createResult()
+  }
+
+  // See if we have a month
+  const monthMatch = onClosingWordMatch(
+    MONTH_WORDS,
+    input,
+    (_, matchText, value) => {
+      repeatFrequency = `${repeatFrequency}Y`
+      byMonth = value
+      startDate = setDate(setMonth(startDate, byMonth - 1), 1)
+      if (isPast(startDate)) {
+        startDate = addYears(startDate, 1)
+      }
+      text = `${text}${matchText}`
+    }
+  )
+
+  if (monthMatch) {
+    return createResult()
+  }
+
+  return null
+}
+
+export function parseSchedule(
+  input: string,
+  config: ParserConfig = { locales: ['en'] }
+): ParseScheduleResult | null {
+  if (!input) {
+    return null
+  }
+
+  const localeConfigs = config.locales.map((key) => locales[key])
+
+  for (const localeConfig of localeConfigs) {
+    const result = parseWithLocale(input, localeConfig)
+    if (result) {
+      return result
+    }
   }
   return null
 }

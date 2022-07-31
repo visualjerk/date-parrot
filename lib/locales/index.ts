@@ -5,3 +5,5 @@ export const locales = {
   en,
   de,
 }
+
+export type LocaleConfig = typeof locales[keyof typeof locales]

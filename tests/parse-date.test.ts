@@ -1,5 +1,5 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
-import { formatISO, addDays } from 'date-fns'
+import { formatISO, addDays, setDate, setMonth } from 'date-fns'
 import { parseDate, ParseDateResult } from '../lib'
 
 const TODAY = new Date('2022-02-04')
@@ -127,6 +127,17 @@ describe('parseDate', () => {
         },
       },
     ],
+    // [
+    //   'erster mai',
+    //   {
+    //     date: formatISO(setMonth(setDate(TODAY, 1), 5)),
+    //     match: {
+    //       index: 0,
+    //       length: 10,
+    //       text: 'erster mai',
+    //     },
+    //   },
+    // ],
   ]
 
   it.each(TEST_CASES)('parses "%s"', (input, output) => {
