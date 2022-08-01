@@ -7,6 +7,8 @@ import {
   onMiddleWordMatch,
   onClosingWordMatch,
   getNextDayOccurrence,
+  TRIGGER_BOUNDARY,
+  CLOSING_BOUNDARY,
 } from './utils'
 
 /**
@@ -83,92 +85,62 @@ function parseWithLocale(
     return createResult()
   }
 
-  // See if we have a schedule trigger word
-  const scheduleTriggerMatch = onTriggerWordMatch(
-    SCHEDULE_TRIGGER_WORDS,
-    input,
-    (matchIndex, matchText) => {
-      index = matchIndex
-      text = matchText
-      input = input.slice(index + text.length)
+  const regexString =
+    `${TRIGGER_BOUNDARY}` +
+    `(?:${SCHEDULE_TRIGGER_WORDS.join('|')}) ` +
+    `(` +
+    `(?<enum>\\d+)(?:${ENUM_SUFFIX}|\\.)? |` +
+    `(?<enumword>${ENUM_WORDS.map(([word]) => word).join('|')}) ` +
+    `)?` +
+    `(` +
+    `(?<unit>${UNIT_WORDS.map(([word]) => word).join('|')})|` +
+    `(?<weekday>${DAY_OF_WEEK_WORDS.map(([word]) => word).join('|')})|` +
+    `(?<month>${MONTH_WORDS.map(([word]) => word).join('|')})` +
+    `)` +
+    `${CLOSING_BOUNDARY}`
+  const regex = new RegExp(regexString, 'g')
+  const result = regex.exec(input)
+
+  if (result) {
+    index = result.index
+    text = result[0]
+
+    if (text[0].match(/\s/)) {
+      index++
+      text = text.slice(1)
     }
-  )
 
-  if (!scheduleTriggerMatch) {
-    return null
-  }
+    const enumMatch = result.groups.enum
+    const enumWordMatch = result.groups.enumword
+    const unitMatch = result.groups.unit
+    const weekdayMatch = result.groups.weekday
+    const monthMatch = result.groups.month
 
-  // See if we have an enumaration like "2", "4.", "20th", etc.
-  let enumMatch = false
-  const match = input.match(new RegExp(`^(\\d+)(${ENUM_SUFFIX}|\\.)? `, 'i'))
-  if (match && match[0]) {
-    const value = match[1]
-    repeatFrequency = `P${value}`
-    text = `${text}${match[0]}`
-    input = input.slice(match[0].length)
-    enumMatch = true
-  }
-
-  // See if we have a distinct enum word like "first", "2nd", etc.
-  if (!enumMatch) {
-    enumMatch = onMiddleWordMatch(ENUM_WORDS, input, (_, matchText, value) => {
-      repeatFrequency = `P${value}`
-      text = `${text}${matchText}`
-      input = input.slice(matchText.length)
-    })
-  }
-
-  // If we dont't have an enum match, the frequency is set to 1
-  if (!enumMatch) {
-    repeatFrequency = 'P1'
-  }
-
-  // See if we have a unit word like "minute", "hour", etc.
-  const unitWordMatch = onClosingWordMatch(
-    UNIT_WORDS,
-    input,
-    (_, matchText, unit) => {
-      repeatFrequency = `${repeatFrequency}${unit}`
-      text = `${text}${matchText}`
+    if (enumMatch) {
+      repeatFrequency = `P${enumMatch}`
+    } else if (enumWordMatch) {
+      const ordinal = ENUM_WORDS.find(([word]) => word === enumWordMatch)[1]
+      repeatFrequency = `P${ordinal}`
+    } else {
+      repeatFrequency = 'P1'
     }
-  )
 
-  if (unitWordMatch) {
-    return createResult()
-  }
-
-  // If we don't have a unit word, see if we have a week day
-  const weekDayMatch = onClosingWordMatch(
-    DAY_OF_WEEK_WORDS,
-    input,
-    (_, matchText, value) => {
+    if (unitMatch) {
+      const repeat = UNIT_WORDS.find(([word]) => word.includes(unitMatch))[1]
+      repeatFrequency = `${repeatFrequency}${repeat}`
+    } else if (weekdayMatch) {
       repeatFrequency = `${repeatFrequency}W`
-      byDay = value
+      byDay = DAY_OF_WEEK_WORDS.find(([word]) => word === weekdayMatch)[1]
       startDate = getNextDayOccurrence(startDate, byDay)
-      text = `${text}${matchText}`
-    }
-  )
-
-  if (weekDayMatch) {
-    return createResult()
-  }
-
-  // See if we have a month
-  const monthMatch = onClosingWordMatch(
-    MONTH_WORDS,
-    input,
-    (_, matchText, value) => {
+    } else if (monthMatch) {
       repeatFrequency = `${repeatFrequency}Y`
-      byMonth = value
+      byMonth = MONTH_WORDS.find(([word]) => word === monthMatch)[1]
       startDate = setDate(setMonth(startDate, byMonth - 1), 1)
       if (isPast(startDate)) {
         startDate = addYears(startDate, 1)
       }
-      text = `${text}${matchText}`
     }
-  )
 
-  if (monthMatch) {
     return createResult()
   }
 
