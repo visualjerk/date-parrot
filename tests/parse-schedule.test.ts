@@ -546,6 +546,20 @@ describe('parseSchedule', () => {
           },
         },
       ],
+      [
+        'alle zwei tage',
+        {
+          schedule: {
+            repeatFrequency: 'P2D',
+            startDate: TODAY_AS_ISO,
+          },
+          match: {
+            index: 0,
+            length: 14,
+            text: 'alle zwei tage',
+          },
+        },
+      ],
     ]
 
     it.each(TEST_CASES)('parses "%s"', (input, output) => {

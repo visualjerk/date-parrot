@@ -97,9 +97,10 @@ function parseWithLocale(
   }
 
   function getWordValue(words, matchWord) {
-    return words.find(([word]) =>
-      word.match(new RegExp(`${matchWord}`, 'i'))
-    )[1]
+    // TODO: This is pretty hacky ... maybe dont allow regex in words
+    return words
+      .filter(([word]) => matchWord.match(new RegExp(`${word}`, 'i')))
+      .sort((a, b) => b[0].length - a[0].length)[0][1]
   }
 
   function createWordRegex(words) {
