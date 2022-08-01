@@ -98,8 +98,14 @@ function parseWithLocale(
     `(?<month>${MONTH_WORDS.map(([word]) => word).join('|')})` +
     `)` +
     `${CLOSING_BOUNDARY}`
-  const regex = new RegExp(regexString, 'g')
+  const regex = new RegExp(regexString, 'gi')
   const result = regex.exec(input)
+
+  function getWordValue(words, matchWord) {
+    return words.find(([word]) =>
+      word.match(new RegExp(`${matchWord}`, 'i'))
+    )[1]
+  }
 
   if (result) {
     index = result.index
@@ -116,26 +122,24 @@ function parseWithLocale(
     const weekdayMatch = result.groups.weekday
     const monthMatch = result.groups.month
 
+    let ordinal = 1
     if (enumMatch) {
-      repeatFrequency = `P${enumMatch}`
+      ordinal = enumMatch
     } else if (enumWordMatch) {
-      const ordinal = ENUM_WORDS.find(([word]) => word === enumWordMatch)[1]
-      repeatFrequency = `P${ordinal}`
-    } else {
-      repeatFrequency = 'P1'
+      ordinal = getWordValue(ENUM_WORDS, enumWordMatch)
     }
 
     if (unitMatch) {
-      const repeat = UNIT_WORDS.find(([word]) => word.includes(unitMatch))[1]
-      repeatFrequency = `${repeatFrequency}${repeat}`
+      const unit = getWordValue(UNIT_WORDS, unitMatch)
+      repeatFrequency = `P${ordinal}${unit}`
     } else if (weekdayMatch) {
-      repeatFrequency = `${repeatFrequency}W`
-      byDay = DAY_OF_WEEK_WORDS.find(([word]) => word === weekdayMatch)[1]
+      repeatFrequency = `P${ordinal}W`
+      byDay = getWordValue(DAY_OF_WEEK_WORDS, weekdayMatch)
       startDate = getNextDayOccurrence(startDate, byDay)
     } else if (monthMatch) {
-      repeatFrequency = `${repeatFrequency}Y`
-      byMonth = MONTH_WORDS.find(([word]) => word === monthMatch)[1]
-      startDate = setDate(setMonth(startDate, byMonth - 1), 1)
+      repeatFrequency = `P1Y`
+      byMonth = getWordValue(MONTH_WORDS, monthMatch)
+      startDate = setDate(setMonth(startDate, byMonth - 1), ordinal)
       if (isPast(startDate)) {
         startDate = addYears(startDate, 1)
       }

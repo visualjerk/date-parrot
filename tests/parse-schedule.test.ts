@@ -269,14 +269,13 @@ describe('parseSchedule', () => {
         },
       },
     ],
-    // TODO: this should be 2nd of june every year
     [
       'every 2nd june',
       {
         schedule: {
-          repeatFrequency: 'P2Y',
+          repeatFrequency: 'P1Y',
           byMonth: Month.June,
-          startDate: formatISO(setDate(setMonth(TODAY, 5), 1)),
+          startDate: formatISO(new Date('2022-06-02:01:00:00')),
         },
         match: {
           index: 0,
