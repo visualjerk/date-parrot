@@ -43,6 +43,7 @@ const SINGLE_DAY_WORDS: EnumDef[] = [
 ]
 
 const ENUM_SUFFIX = 'ter?'
+const TIME_TRIGGER = 'um'
 
 const ENUM_WORDS: EnumDef[] = [
   ['erste[rn]?', 1],
@@ -107,6 +108,7 @@ export const de = {
   DATE_NEXT_TRIGGER_WORDS,
   SINGLE_DAY_WORDS,
   ENUM_SUFFIX,
+  TIME_TRIGGER,
   ENUM_WORDS,
   UNIT_WORDS,
 }

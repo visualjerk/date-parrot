@@ -43,6 +43,8 @@ export const buildWordMatcher = (regexBuilder: (word: string) => RegExp) =>
 
 export const TRIGGER_BOUNDARY = '(?:^|\\s)'
 export const CLOSING_BOUNDARY = '(?=$|[\\s.,;:!?])'
+export const TIME_REGEX =
+  '(?:[01]\\d|2[0123])(:(?:[012345]\\d))?(:(?:[012345]\\d))?'
 
 export const onSingleWordMatch = buildWordMatcher(
   (word) => new RegExp(`${TRIGGER_BOUNDARY}${word}${CLOSING_BOUNDARY}`, 'i')

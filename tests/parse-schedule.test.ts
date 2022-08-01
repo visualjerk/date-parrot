@@ -299,6 +299,66 @@ describe('parseSchedule', () => {
         },
       },
     ],
+    [
+      'every 2nd june 10:00',
+      {
+        schedule: {
+          repeatFrequency: 'P1Y',
+          byMonth: Month.June,
+          startDate: formatISO(new Date('2022-06-02:10:00:00')),
+        },
+        match: {
+          index: 0,
+          length: 20,
+          text: 'every 2nd june 10:00',
+        },
+      },
+    ],
+    [
+      '10:00 every 2nd june',
+      {
+        schedule: {
+          repeatFrequency: 'P1Y',
+          byMonth: Month.June,
+          startDate: formatISO(new Date('2022-06-02:10:00:00')),
+        },
+        match: {
+          index: 0,
+          length: 20,
+          text: '10:00 every 2nd june',
+        },
+      },
+    ],
+    [
+      'at 10:00 every 2nd june',
+      {
+        schedule: {
+          repeatFrequency: 'P1Y',
+          byMonth: Month.June,
+          startDate: formatISO(new Date('2022-06-02:10:00:00')),
+        },
+        match: {
+          index: 0,
+          length: 23,
+          text: 'at 10:00 every 2nd june',
+        },
+      },
+    ],
+    [
+      'every 2nd june at 10:00',
+      {
+        schedule: {
+          repeatFrequency: 'P1Y',
+          byMonth: Month.June,
+          startDate: formatISO(new Date('2022-06-02:10:00:00')),
+        },
+        match: {
+          index: 0,
+          length: 23,
+          text: 'every 2nd june at 10:00',
+        },
+      },
+    ],
   ]
 
   it.each(TEST_CASES)('parses "%s"', (input, output) => {

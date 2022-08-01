@@ -1,4 +1,13 @@
-import { setDate, setMonth, addYears, isPast, formatISO } from 'date-fns'
+import {
+  setDate,
+  setMonth,
+  addYears,
+  isPast,
+  formatISO,
+  setHours,
+  setMinutes,
+  setSeconds,
+} from 'date-fns'
 import { DayOfWeek, Month, ParserConfig } from './types'
 import { locales, LocaleConfig } from './locales'
 import {
@@ -9,6 +18,7 @@ import {
   getNextDayOccurrence,
   TRIGGER_BOUNDARY,
   CLOSING_BOUNDARY,
+  TIME_REGEX,
 } from './utils'
 
 /**
@@ -42,6 +52,7 @@ function parseWithLocale(
     ENUM_WORDS,
     UNIT_WORDS,
     ENUM_SUFFIX,
+    TIME_TRIGGER,
   } = localeConfig
 
   let repeatFrequency: string | undefined
@@ -85,27 +96,33 @@ function parseWithLocale(
     return createResult()
   }
 
-  const regexString =
-    `${TRIGGER_BOUNDARY}` +
-    `(?:${SCHEDULE_TRIGGER_WORDS.join('|')}) ` +
-    `(` +
-    `(?<enum>\\d+)(?:${ENUM_SUFFIX}|\\.)? |` +
-    `(?<enumword>${ENUM_WORDS.map(([word]) => word).join('|')}) ` +
-    `)?` +
-    `(` +
-    `(?<unit>${UNIT_WORDS.map(([word]) => word).join('|')})|` +
-    `(?<weekday>${DAY_OF_WEEK_WORDS.map(([word]) => word).join('|')})|` +
-    `(?<month>${MONTH_WORDS.map(([word]) => word).join('|')})` +
-    `)` +
-    `${CLOSING_BOUNDARY}`
-  const regex = new RegExp(regexString, 'gi')
-  const result = regex.exec(input)
-
   function getWordValue(words, matchWord) {
     return words.find(([word]) =>
       word.match(new RegExp(`${matchWord}`, 'i'))
     )[1]
   }
+
+  function createWordRegex(words) {
+    return words.map(([word]) => word).join('|')
+  }
+
+  const regexString =
+    `${TRIGGER_BOUNDARY}` +
+    `((?:(${TIME_TRIGGER}) )?(?<timepre>${TIME_REGEX}) )?` +
+    `(?:${SCHEDULE_TRIGGER_WORDS.join('|')}) ` +
+    `(` +
+    `(?<enumcount>\\d+)(?:${ENUM_SUFFIX}|\\.)? |` +
+    `(?<enumword>${createWordRegex(ENUM_WORDS)}) ` +
+    `)?` +
+    `(` +
+    `(?<unit>${createWordRegex(UNIT_WORDS)})|` +
+    `(?<weekday>${createWordRegex(DAY_OF_WEEK_WORDS)})|` +
+    `(?<month>${createWordRegex(MONTH_WORDS)})` +
+    `)` +
+    `( (?:(${TIME_TRIGGER}) )?(?<timepost>${TIME_REGEX}))?` +
+    `${CLOSING_BOUNDARY}`
+  const regex = new RegExp(regexString, 'gi')
+  const result = regex.exec(input)
 
   if (result) {
     index = result.index
@@ -116,29 +133,39 @@ function parseWithLocale(
       text = text.slice(1)
     }
 
-    const enumMatch = result.groups.enum
-    const enumWordMatch = result.groups.enumword
-    const unitMatch = result.groups.unit
-    const weekdayMatch = result.groups.weekday
-    const monthMatch = result.groups.month
+    const { enumcount, enumword, unit, weekday, month, timepost, timepre } =
+      result.groups
+
+    const time = timepost || timepre
 
     let ordinal = 1
-    if (enumMatch) {
-      ordinal = enumMatch
-    } else if (enumWordMatch) {
-      ordinal = getWordValue(ENUM_WORDS, enumWordMatch)
+    if (enumcount) {
+      ordinal = enumcount
+    } else if (enumword) {
+      ordinal = getWordValue(ENUM_WORDS, enumword)
     }
 
-    if (unitMatch) {
-      const unit = getWordValue(UNIT_WORDS, unitMatch)
-      repeatFrequency = `P${ordinal}${unit}`
-    } else if (weekdayMatch) {
+    if (time) {
+      const timeParts = time.split(':')
+      const hours = parseInt(timeParts[0])
+      const minutes = timeParts[1] ? parseInt(timeParts[1]) : 0
+      const seconds = timeParts[2] ? parseInt(timeParts[2]) : 0
+
+      startDate = setHours(startDate, hours)
+      startDate = setMinutes(startDate, minutes)
+      startDate = setSeconds(startDate, seconds)
+    }
+
+    if (unit) {
+      const unitAbbreviation = getWordValue(UNIT_WORDS, unit)
+      repeatFrequency = `P${ordinal}${unitAbbreviation}`
+    } else if (weekday) {
       repeatFrequency = `P${ordinal}W`
-      byDay = getWordValue(DAY_OF_WEEK_WORDS, weekdayMatch)
+      byDay = getWordValue(DAY_OF_WEEK_WORDS, weekday)
       startDate = getNextDayOccurrence(startDate, byDay)
-    } else if (monthMatch) {
+    } else if (month) {
       repeatFrequency = `P1Y`
-      byMonth = getWordValue(MONTH_WORDS, monthMatch)
+      byMonth = getWordValue(MONTH_WORDS, month)
       startDate = setDate(setMonth(startDate, byMonth - 1), ordinal)
       if (isPast(startDate)) {
         startDate = addYears(startDate, 1)
