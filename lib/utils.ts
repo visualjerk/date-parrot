@@ -43,6 +43,8 @@ export const buildWordMatcher = (regexBuilder: (word: string) => RegExp) =>
 
 export const TRIGGER_BOUNDARY = '(?:^|\\s)'
 export const CLOSING_BOUNDARY = '(?=$|[\\s.,;:!?])'
+
+// TODO: get date matcher from https://digitalfortress.tech/tips/top-15-commonly-used-regex/
 export const TIME_REGEX =
   '(?:[01]\\d|2[0123])(:(?:[012345]\\d))?(:(?:[012345]\\d))?'
 
