@@ -157,7 +157,7 @@ describe('parseSchedule', () => {
     })
   })
 
-  describe('enumaration', () => {
+  describe('integers', () => {
     const TEST_CASES: [string, number][] = [
       ['first', 1],
       ['second', 2],
