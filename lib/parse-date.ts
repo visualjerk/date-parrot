@@ -28,7 +28,7 @@ function parseWithLocale(
     DAY_OF_WEEK_WORDS,
     DATE_NEXT_TRIGGER_WORDS,
     MONTH_WORDS,
-    ENUM_SUFFIX,
+    INTEGER_SUFFIX,
   } = localeConfig
 
   let date = new Date()
@@ -98,7 +98,7 @@ function parseWithLocale(
   // See if we have an enumaration like "2", "4.", "20th", etc.
   let dayOfMonth: number | undefined
   const match = input.match(
-    new RegExp(`${TRIGGER_BOUNDARY}(\\d+)(${ENUM_SUFFIX}|\\.)? `, 'i')
+    new RegExp(`${TRIGGER_BOUNDARY}(\\d+)(${INTEGER_SUFFIX}|\\.)? `, 'i')
   )
   if (match && match[0]) {
     if (index == null) {
@@ -133,7 +133,7 @@ function parseWithLocale(
 
   // Look for an enum behind the month (e.g. "june 3th")
   const postEnumMatch = input.match(
-    new RegExp(`^ (\\d+)(${ENUM_SUFFIX}|\\.)?(?=$|\\s)`, 'i')
+    new RegExp(`^ (\\d+)(${INTEGER_SUFFIX}|\\.)?(?=$|\\s)`, 'i')
   )
   if (postEnumMatch && postEnumMatch[0]) {
     dayOfMonth = Number(postEnumMatch[1])

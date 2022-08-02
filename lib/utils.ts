@@ -88,3 +88,17 @@ export function getNextMonthOccurrence(date: Date, month: number): Date {
   }
   return result
 }
+
+export function getWordValue<TWord extends EnumDef | StringDef>(
+  words: TWord[],
+  matchWord: string
+): TWord[1] {
+  // TODO: This is pretty hacky ... maybe dont allow regex in words
+  return words
+    .filter(([word]) => matchWord.match(new RegExp(`${word}`, 'i')))
+    .sort((a, b) => b[0].length - a[0].length)[0][1]
+}
+
+export function createWordRegex(words: EnumDef[] | StringDef[]): string {
+  return words.map(([word]) => word).join('|')
+}

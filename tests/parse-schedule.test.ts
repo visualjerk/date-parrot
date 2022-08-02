@@ -100,7 +100,7 @@ describe('parseSchedule', () => {
     ['every 2nd friday', 'P2W', TODAY, { byDay: DayOfWeek.Friday }],
     ['every 2 friday', 'P2W', TODAY, { byDay: DayOfWeek.Friday }],
     ['every 2. friday', 'P2W', TODAY, { byDay: DayOfWeek.Friday }],
-    ['every monday', 'P1W', nextMonday(TODAY), { byDay: DayOfWeek.Friday }],
+    ['every monday', 'P1W', nextMonday(TODAY), { byDay: DayOfWeek.Monday }],
     [
       'every june',
       'P1Y',
