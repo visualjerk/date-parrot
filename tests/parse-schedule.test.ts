@@ -1,16 +1,75 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
 import { nextMonday, setMonth, setDate, addYears, formatISO } from 'date-fns'
-import { DayOfWeek, Month, parseSchedule, ParseScheduleResult } from '../lib'
+import {
+  DayOfWeek,
+  Month,
+  ParserConfig,
+  parseSchedule,
+  ParseScheduleResult,
+} from '../lib'
+
+type OptionalScheduleResultOptions = Omit<
+  ParseScheduleResult['schedule'],
+  'repeatFrequency' | 'startDate'
+>
+
+type TestCase = [
+  string | null,
+  string | null,
+  Date?,
+  OptionalScheduleResultOptions?,
+  string?,
+  number?
+]
 
 const TODAY = new Date('2022-02-04')
-const TODAY_AS_ISO = formatISO(TODAY)
+
+function createParseResult(
+  input: string | null,
+  repeatFrequency: string | null,
+  date: Date = TODAY,
+  scheduleOptions?: OptionalScheduleResultOptions,
+  text = input || '',
+  index = 0
+): ParseScheduleResult | null {
+  if (repeatFrequency == null || date == null) {
+    return null
+  }
+  const output: ParseScheduleResult = {
+    schedule: {
+      repeatFrequency: repeatFrequency,
+      startDate: formatISO(date),
+    },
+    match: {
+      index,
+      length: text.length,
+      text,
+    },
+  }
+  if (scheduleOptions) {
+    for (const [key, value] of Object.entries(scheduleOptions)) {
+      output.schedule[key] = value
+    }
+  }
+  return output
+}
+
+function expectTestCasesToSucceed(
+  testCases: TestCase[],
+  config?: ParserConfig
+) {
+  it.each(testCases)('parses "%s"', (input, ...testCase) => {
+    const output = createParseResult(input, ...testCase)
+    expect(parseSchedule(input as string, config)).toEqual(output)
+  })
+}
 
 describe('parseSchedule', () => {
   beforeEach(() => {
     vi.useFakeTimers().setSystemTime(TODAY)
   })
 
-  const TEST_CASES: [string | null, ParseScheduleResult | null][] = [
+  const TEST_CASES: TestCase[] = [
     [null, null],
     ['', null],
     ['hello', null],
@@ -19,351 +78,74 @@ describe('parseSchedule', () => {
     ['every once in a while a second day', null],
     ['every 2', null],
     ['every 2n day', null],
-    [
-      'everyday',
-      {
-        schedule: {
-          repeatFrequency: 'P1D',
-          startDate: TODAY_AS_ISO,
-        },
-        match: {
-          index: 0,
-          length: 8,
-          text: 'everyday',
-        },
-      },
-    ],
-    [
-      'daily',
-      {
-        schedule: {
-          repeatFrequency: 'P1D',
-          startDate: TODAY_AS_ISO,
-        },
-        match: {
-          index: 0,
-          length: 5,
-          text: 'daily',
-        },
-      },
-    ],
-    [
-      'every day',
-      {
-        schedule: {
-          repeatFrequency: 'P1D',
-          startDate: TODAY_AS_ISO,
-        },
-        match: {
-          index: 0,
-          length: 9,
-          text: 'every day',
-        },
-      },
-    ],
-    [
-      'EverY Day',
-      {
-        schedule: {
-          repeatFrequency: 'P1D',
-          startDate: TODAY_AS_ISO,
-        },
-        match: {
-          index: 0,
-          length: 9,
-          text: 'EverY Day',
-        },
-      },
-    ],
-    [
-      'every second day',
-      {
-        schedule: {
-          repeatFrequency: 'P2D',
-          startDate: TODAY_AS_ISO,
-        },
-        match: {
-          index: 0,
-          length: 16,
-          text: 'every second day',
-        },
-      },
-    ],
-    [
-      'Every SecoNd Day',
-      {
-        schedule: {
-          repeatFrequency: 'P2D',
-          startDate: TODAY_AS_ISO,
-        },
-        match: {
-          index: 0,
-          length: 16,
-          text: 'Every SecoNd Day',
-        },
-      },
-    ],
-    [
-      'every third day',
-      {
-        schedule: {
-          repeatFrequency: 'P3D',
-          startDate: TODAY_AS_ISO,
-        },
-        match: {
-          index: 0,
-          length: 15,
-          text: 'every third day',
-        },
-      },
-    ],
-    [
-      'every week',
-      {
-        schedule: {
-          repeatFrequency: 'P1W',
-          startDate: TODAY_AS_ISO,
-        },
-        match: {
-          index: 0,
-          length: 10,
-          text: 'every week',
-        },
-      },
-    ],
-    [
-      'every second week',
-      {
-        schedule: {
-          repeatFrequency: 'P2W',
-          startDate: TODAY_AS_ISO,
-        },
-        match: {
-          index: 0,
-          length: 17,
-          text: 'every second week',
-        },
-      },
-    ],
+    ['everyday', 'P1D'],
+    ['daily', 'P1D'],
+    ['every day', 'P1D'],
+    ['EverY Day', 'P1D'],
+    ['every second day', 'P2D'],
+    ['Every SecoNd Day', 'P2D'],
+    ['every third day', 'P3D'],
+    ['every week', 'P1W'],
+    ['every second week', 'P2W'],
     ['every  second   week', null],
-    // TODO: do we want to support multiple spaces between words?
-    // [
-    //   'every  second   week',
-    //   {
-    //     schedule: {
-    //       repeatFrequency: 'P2W',
-    //       startDate: TODAY_AS_ISO,
-    //     },
-    //     match: {
-    //       index: 0,
-    //       length: 20,
-    //       text: 'every  second   week',
-    //     },
-    //   },
-    // ],
     [
       'on every second week go crazy',
-      {
-        schedule: {
-          repeatFrequency: 'P2W',
-          startDate: TODAY_AS_ISO,
-        },
-        match: {
-          index: 3,
-          length: 17,
-          text: 'every second week',
-        },
-      },
+      'P2W',
+      undefined,
+      undefined,
+      'every second week',
+      3,
     ],
-    [
-      'every friday',
-      {
-        schedule: {
-          repeatFrequency: 'P1W',
-          byDay: DayOfWeek.Friday,
-          // today is a firday
-          startDate: TODAY_AS_ISO,
-        },
-        match: {
-          index: 0,
-          length: 12,
-          text: 'every friday',
-        },
-      },
-    ],
-    [
-      'every 2nd friday',
-      {
-        schedule: {
-          repeatFrequency: 'P2W',
-          byDay: DayOfWeek.Friday,
-          // today is a firday
-          startDate: TODAY_AS_ISO,
-        },
-        match: {
-          index: 0,
-          length: 16,
-          text: 'every 2nd friday',
-        },
-      },
-    ],
-    [
-      'every 2 friday',
-      {
-        schedule: {
-          repeatFrequency: 'P2W',
-          byDay: DayOfWeek.Friday,
-          // today is a firday
-          startDate: TODAY_AS_ISO,
-        },
-        match: {
-          index: 0,
-          length: 14,
-          text: 'every 2 friday',
-        },
-      },
-    ],
-    [
-      'every 2. friday',
-      {
-        schedule: {
-          repeatFrequency: 'P2W',
-          byDay: DayOfWeek.Friday,
-          // today is a firday
-          startDate: TODAY_AS_ISO,
-        },
-        match: {
-          index: 0,
-          length: 15,
-          text: 'every 2. friday',
-        },
-      },
-    ],
-    [
-      'every monday',
-      {
-        schedule: {
-          repeatFrequency: 'P1W',
-          byDay: DayOfWeek.Monday,
-          startDate: formatISO(nextMonday(TODAY)),
-        },
-        match: {
-          index: 0,
-          length: 12,
-          text: 'every monday',
-        },
-      },
-    ],
+    ['every friday', 'P1W', TODAY, { byDay: DayOfWeek.Friday }],
+    ['every 2nd friday', 'P2W', TODAY, { byDay: DayOfWeek.Friday }],
+    ['every 2 friday', 'P2W', TODAY, { byDay: DayOfWeek.Friday }],
+    ['every 2. friday', 'P2W', TODAY, { byDay: DayOfWeek.Friday }],
+    ['every monday', 'P1W', nextMonday(TODAY), { byDay: DayOfWeek.Friday }],
     [
       'every june',
-      {
-        schedule: {
-          repeatFrequency: 'P1Y',
-          byMonth: Month.June,
-          startDate: formatISO(setDate(setMonth(TODAY, 5), 1)),
-        },
-        match: {
-          index: 0,
-          length: 10,
-          text: 'every june',
-        },
-      },
+      'P1Y',
+      setDate(setMonth(TODAY, 5), 1),
+      { byMonth: Month.June },
     ],
     [
       'every 2nd june',
-      {
-        schedule: {
-          repeatFrequency: 'P1Y',
-          byMonth: Month.June,
-          startDate: formatISO(new Date('2022-06-02:01:00:00')),
-        },
-        match: {
-          index: 0,
-          length: 14,
-          text: 'every 2nd june',
-        },
-      },
+      'P1Y',
+      new Date('2022-06-02:01:00:00'),
+      { byMonth: Month.June },
     ],
     [
       'every january',
-      {
-        schedule: {
-          repeatFrequency: 'P1Y',
-          byMonth: Month.January,
-          startDate: formatISO(addYears(setDate(setMonth(TODAY, 0), 1), 1)),
-        },
-        match: {
-          index: 0,
-          length: 13,
-          text: 'every january',
-        },
-      },
+      'P1Y',
+      addYears(setDate(setMonth(TODAY, 0), 1), 1),
+      { byMonth: Month.January },
     ],
     [
       'every 2nd june 10:00',
-      {
-        schedule: {
-          repeatFrequency: 'P1Y',
-          byMonth: Month.June,
-          startDate: formatISO(new Date('2022-06-02:10:00:00')),
-        },
-        match: {
-          index: 0,
-          length: 20,
-          text: 'every 2nd june 10:00',
-        },
-      },
-    ],
-    [
-      '10:00 every 2nd june',
-      {
-        schedule: {
-          repeatFrequency: 'P1Y',
-          byMonth: Month.June,
-          startDate: formatISO(new Date('2022-06-02:10:00:00')),
-        },
-        match: {
-          index: 0,
-          length: 20,
-          text: '10:00 every 2nd june',
-        },
-      },
-    ],
-    [
-      'at 10:00 every 2nd june',
-      {
-        schedule: {
-          repeatFrequency: 'P1Y',
-          byMonth: Month.June,
-          startDate: formatISO(new Date('2022-06-02:10:00:00')),
-        },
-        match: {
-          index: 0,
-          length: 23,
-          text: 'at 10:00 every 2nd june',
-        },
-      },
+      'P1Y',
+      new Date('2022-06-02:10:00:00'),
+      { byMonth: Month.June },
     ],
     [
       'every 2nd june at 10:00',
-      {
-        schedule: {
-          repeatFrequency: 'P1Y',
-          byMonth: Month.June,
-          startDate: formatISO(new Date('2022-06-02:10:00:00')),
-        },
-        match: {
-          index: 0,
-          length: 23,
-          text: 'every 2nd june at 10:00',
-        },
-      },
+      'P1Y',
+      new Date('2022-06-02:10:00:00'),
+      { byMonth: Month.June },
+    ],
+    [
+      '10:00 every 2nd june',
+      'P1Y',
+      new Date('2022-06-02:10:00:00'),
+      { byMonth: Month.June },
+    ],
+    [
+      'at 10:00 every 2nd june',
+      'P1Y',
+      new Date('2022-06-02:10:00:00'),
+      { byMonth: Month.June },
     ],
   ]
 
-  it.each(TEST_CASES)('parses "%s"', (input, output) => {
-    expect(parseSchedule(input as string)).toEqual(output)
-  })
+  expectTestCasesToSucceed(TEST_CASES)
 
   describe('triggers', () => {
     const TEST_CASES: string[] = ['each', 'every']
@@ -517,94 +299,19 @@ describe('parseSchedule', () => {
   })
 
   describe('german', () => {
-    const TEST_CASES: [string | null, ParseScheduleResult | null][] = [
-      [
-        'täglich',
-        {
-          schedule: {
-            repeatFrequency: 'P1D',
-            startDate: TODAY_AS_ISO,
-          },
-          match: {
-            index: 0,
-            length: 7,
-            text: 'täglich',
-          },
-        },
-      ],
-      [
-        'jeden tag',
-        {
-          schedule: {
-            repeatFrequency: 'P1D',
-            startDate: TODAY_AS_ISO,
-          },
-          match: {
-            index: 0,
-            length: 9,
-            text: 'jeden tag',
-          },
-        },
-      ],
-      [
-        'alle zwei tage',
-        {
-          schedule: {
-            repeatFrequency: 'P2D',
-            startDate: TODAY_AS_ISO,
-          },
-          match: {
-            index: 0,
-            length: 14,
-            text: 'alle zwei tage',
-          },
-        },
-      ],
+    const TEST_CASES: TestCase[] = [
+      ['täglich', 'P1D'],
+      ['jeden tag', 'P1D'],
+      ['alle zwei tage', 'P2D'],
     ]
-
-    it.each(TEST_CASES)('parses "%s"', (input, output) => {
-      expect(parseSchedule(input as string, { locales: ['de'] })).toEqual(
-        output
-      )
-    })
+    expectTestCasesToSucceed(TEST_CASES, { locales: ['de'] })
   })
 
   describe('mixed locales', () => {
-    const TEST_CASES: [string | null, ParseScheduleResult | null][] = [
-      [
-        'täglich',
-        {
-          schedule: {
-            repeatFrequency: 'P1D',
-            startDate: TODAY_AS_ISO,
-          },
-          match: {
-            index: 0,
-            length: 7,
-            text: 'täglich',
-          },
-        },
-      ],
-      [
-        'everyday',
-        {
-          schedule: {
-            repeatFrequency: 'P1D',
-            startDate: TODAY_AS_ISO,
-          },
-          match: {
-            index: 0,
-            length: 8,
-            text: 'everyday',
-          },
-        },
-      ],
+    const TEST_CASES: TestCase[] = [
+      ['täglich', 'P1D'],
+      ['everyday', 'P1D'],
     ]
-
-    it.each(TEST_CASES)('parses "%s"', (input, output) => {
-      expect(parseSchedule(input as string, { locales: ['en', 'de'] })).toEqual(
-        output
-      )
-    })
+    expectTestCasesToSucceed(TEST_CASES, { locales: ['en', 'de'] })
   })
 })
