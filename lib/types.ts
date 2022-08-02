@@ -1,5 +1,9 @@
 import type { locales } from './locales'
 
+export type RegExpExecArrayWithGroups<T> =
+  | (RegExpExecArray & { groups: T })
+  | null
+
 export type EnumDef = [string, number]
 export type StringDef = [string, string]
 

@@ -8,13 +8,17 @@ import {
   setMinutes,
   setSeconds,
 } from 'date-fns'
-import { DayOfWeek, Month, ParserConfig } from './types'
+import {
+  DayOfWeek,
+  EnumDef,
+  Month,
+  ParserConfig,
+  RegExpExecArrayWithGroups,
+  StringDef,
+} from './types'
 import { locales, LocaleConfig } from './locales'
 import {
   onSingleWordMatch,
-  onTriggerWordMatch,
-  onMiddleWordMatch,
-  onClosingWordMatch,
   getNextDayOccurrence,
   TRIGGER_BOUNDARY,
   CLOSING_BOUNDARY,
@@ -96,14 +100,17 @@ function parseWithLocale(
     return createResult()
   }
 
-  function getWordValue(words, matchWord) {
+  function getWordValue<TWord extends EnumDef | StringDef>(
+    words: TWord[],
+    matchWord: string
+  ): TWord[1] {
     // TODO: This is pretty hacky ... maybe dont allow regex in words
     return words
       .filter(([word]) => matchWord.match(new RegExp(`${word}`, 'i')))
       .sort((a, b) => b[0].length - a[0].length)[0][1]
   }
 
-  function createWordRegex(words) {
+  function createWordRegex(words: EnumDef[] | StringDef[]): string {
     return words.map(([word]) => word).join('|')
   }
 
@@ -123,7 +130,15 @@ function parseWithLocale(
     `( (?:(${TIME_TRIGGER}) )?(?<timepost>${TIME_REGEX}))?` +
     `${CLOSING_BOUNDARY}`
   const regex = new RegExp(regexString, 'gi')
-  const result = regex.exec(input)
+  const result = regex.exec(input) as RegExpExecArrayWithGroups<{
+    timepre?: string
+    enumcount?: string
+    enumword?: string
+    unit?: string
+    weekday?: string
+    month?: string
+    timepost?: string
+  }>
 
   if (result) {
     index = result.index
@@ -139,11 +154,11 @@ function parseWithLocale(
 
     const time = timepost || timepre
 
-    let ordinal = 1
+    let enumvalue = 1
     if (enumcount) {
-      ordinal = enumcount
+      enumvalue = parseInt(enumcount)
     } else if (enumword) {
-      ordinal = getWordValue(ENUM_WORDS, enumword)
+      enumvalue = getWordValue(ENUM_WORDS, enumword)
     }
 
     if (time) {
@@ -159,15 +174,15 @@ function parseWithLocale(
 
     if (unit) {
       const unitAbbreviation = getWordValue(UNIT_WORDS, unit)
-      repeatFrequency = `P${ordinal}${unitAbbreviation}`
+      repeatFrequency = `P${enumvalue}${unitAbbreviation}`
     } else if (weekday) {
-      repeatFrequency = `P${ordinal}W`
+      repeatFrequency = `P${enumvalue}W`
       byDay = getWordValue(DAY_OF_WEEK_WORDS, weekday)
       startDate = getNextDayOccurrence(startDate, byDay)
     } else if (month) {
       repeatFrequency = `P1Y`
       byMonth = getWordValue(MONTH_WORDS, month)
-      startDate = setDate(setMonth(startDate, byMonth - 1), ordinal)
+      startDate = setDate(setMonth(startDate, byMonth - 1), enumvalue)
       if (isPast(startDate)) {
         startDate = addYears(startDate, 1)
       }
