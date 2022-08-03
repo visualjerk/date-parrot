@@ -47,6 +47,7 @@ const TIME_TRIGGER = 'on|at'
 const INTEGER_WORDS: EnumDef[] = [
   ['first', 1],
   ['second', 2],
+  ['other', 2],
   ['third', 3],
   ['fourth', 4],
   ['fifth', 5],

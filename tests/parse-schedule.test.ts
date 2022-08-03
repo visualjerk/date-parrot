@@ -84,6 +84,7 @@ describe('parseSchedule', () => {
     ['EverY Day', 'P1D'],
     ['every second day', 'P2D'],
     ['Every SecoNd Day', 'P2D'],
+    ['every other day', 'P2D'],
     ['every third day', 'P3D'],
     ['every week', 'P1W'],
     ['every second week', 'P2W'],
@@ -142,6 +143,16 @@ describe('parseSchedule', () => {
       'P1Y',
       new Date('2022-06-02:10:00:00'),
       { byMonth: Month.June },
+    ],
+    ['every 2nd day at 10:00', 'P2D', new Date('2022-02-04:10:00:00')],
+    ['at 14:21 every 2nd week', 'P2W', new Date('2022-02-04:14:21:00')],
+    [
+      'at 25:00 every 2nd week',
+      'P2W',
+      undefined,
+      undefined,
+      'every 2nd week',
+      9,
     ],
   ]
 

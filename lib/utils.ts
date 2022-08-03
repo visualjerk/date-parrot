@@ -6,7 +6,8 @@ import {
   setDay,
   setMonth,
 } from 'date-fns'
-import { EnumDef, StringDef } from './types'
+import { LocaleConfig } from './locales'
+import { EnumDef, RegExpExecArrayWithGroups, StringDef } from './types'
 
 type TValue<TDef extends EnumDef | StringDef | string> = TDef extends string
   ? TDef
@@ -101,4 +102,84 @@ export function getWordValue<TWord extends EnumDef | StringDef>(
 
 export function createWordRegex(words: EnumDef[] | StringDef[]): string {
   return words.map(([word]) => word).join('|')
+}
+
+export interface ParsePhraseResult {
+  index: number
+  text: string
+  integer?: number
+  hours?: number
+  minutes?: number
+  seconds?: number
+  unit?: string
+  weekday?: number
+  month?: number
+}
+
+export function parsePhrase(
+  input: string,
+  phraseRegex: string,
+  localeConfig: LocaleConfig
+): ParsePhraseResult | null {
+  const { DAY_OF_WEEK_WORDS, MONTH_WORDS, INTEGER_WORDS, UNIT_WORDS } =
+    localeConfig
+
+  const regexString = `${TRIGGER_BOUNDARY}${phraseRegex}${CLOSING_BOUNDARY}`
+  const regex = new RegExp(regexString, 'gi')
+  const match = regex.exec(input) as RegExpExecArrayWithGroups<{
+    timepre?: string
+    integer?: string
+    integerword?: string
+    unit?: string
+    weekday?: string
+    month?: string
+    timepost?: string
+  }>
+
+  if (!match) {
+    return null
+  }
+
+  const result: ParsePhraseResult = {
+    index: match.index,
+    text: match[0],
+  }
+
+  // Needed as long as lookbehind is not supported by all browsers
+  // Later on we can use (?<=^|\\s) as the boundary for the start of a phrase
+  // Word boundary \b is no option, as it does not match umlauts (e.g. "ü,ö")
+  if (result.text[0].match(/\s/)) {
+    result.index++
+    result.text = result.text.slice(1)
+  }
+
+  const { integer, integerword, unit, weekday, month, timepost, timepre } =
+    match.groups
+
+  if (integer) {
+    result.integer = parseInt(integer)
+  } else if (integerword) {
+    result.integer = getWordValue(INTEGER_WORDS, integerword)
+  }
+
+  const time = timepost || timepre
+
+  if (time) {
+    const timeParts = time.split(':')
+    result.hours = parseInt(timeParts[0])
+    result.minutes = timeParts[1] ? parseInt(timeParts[1]) : 0
+    result.seconds = timeParts[2] ? parseInt(timeParts[2]) : 0
+  }
+
+  if (unit) {
+    result.unit = getWordValue(UNIT_WORDS, unit)
+  }
+  if (weekday) {
+    result.weekday = getWordValue(DAY_OF_WEEK_WORDS, weekday)
+  }
+  if (month) {
+    result.month = getWordValue(MONTH_WORDS, month)
+  }
+
+  return result
 }
