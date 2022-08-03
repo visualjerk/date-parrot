@@ -104,6 +104,26 @@ export function createWordRegex(words: EnumDef[] | StringDef[]): string {
   return words.map(([word]) => word).join('|')
 }
 
+/**
+ * Returns result of the highest priority match for a given group name
+ *
+ * @example
+ * If there are two groups "time1" and "time2" and both have
+ * matches, the result will be the match of "time1"
+ */
+function getHighestPrioGroupMatch(
+  groups: Record<string, string>,
+  groupName: string
+): string | null {
+  return Object.entries(groups)
+    .filter(([key, value]) => key.startsWith(groupName) && value != null)
+    .sort(([keyA], [keyB]) => {
+      const aOrder = parseInt(keyA.replace(groupName, ''))
+      const bOrder = parseInt(keyB.replace(groupName, ''))
+      return aOrder - bOrder
+    })[0]?.[1]
+}
+
 export interface ParsePhraseResult {
   index: number
   text: string
@@ -153,16 +173,15 @@ export function parsePhrase(
     result.text = result.text.slice(1)
   }
 
-  const { integer, integerword, unit, weekday, month, timepost, timepre } =
-    match.groups
+  const { integer, integerword, unit, weekday, month } = match.groups
+
+  const time = getHighestPrioGroupMatch(match.groups, 'time')
 
   if (integer) {
     result.integer = parseInt(integer)
   } else if (integerword) {
     result.integer = getWordValue(INTEGER_WORDS, integerword)
   }
-
-  const time = timepost || timepre
 
   if (time) {
     const timeParts = time.split(':')

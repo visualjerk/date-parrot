@@ -93,8 +93,9 @@ function parseWithLocale(
     return createResult()
   }
 
+  // TODO: create helper for building a phrase
   const phraseRegex =
-    `((?:(${TIME_TRIGGER}) )?(?<timepre>${TIME_REGEX}) )?` +
+    `((?:(${TIME_TRIGGER}) )?(?<time1>${TIME_REGEX}) )?` +
     `(?:${SCHEDULE_TRIGGER_WORDS.join('|')}) ` +
     `(` +
     `(?<integer>\\d+)(?:${INTEGER_SUFFIX}|\\.)? |` +
@@ -105,7 +106,7 @@ function parseWithLocale(
     `(?<weekday>${createWordRegex(DAY_OF_WEEK_WORDS)})|` +
     `(?<month>${createWordRegex(MONTH_WORDS)})` +
     `)` +
-    `( (?:(${TIME_TRIGGER}) )?(?<timepost>${TIME_REGEX}))?`
+    `( (?:(${TIME_TRIGGER}) )?(?<time2>${TIME_REGEX}))?`
   const result = parsePhrase(input, phraseRegex, localeConfig)
 
   if (result) {
