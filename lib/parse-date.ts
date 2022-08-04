@@ -5,9 +5,8 @@ import {
   onSingleWordMatch,
   getNextDayOccurrence,
   getNextMonthOccurrence,
-  onTriggerWordMatch,
-  onClosingWordMatch,
-  TRIGGER_BOUNDARY,
+  createWordRegex,
+  parsePhrase,
 } from './utils'
 
 export interface ParseDateResult {
@@ -29,6 +28,7 @@ function parseWithLocale(
     DATE_NEXT_TRIGGER_WORDS,
     MONTH_WORDS,
     INTEGER_SUFFIX,
+    INTEGER_WORDS,
   } = localeConfig
 
   let date = new Date()
@@ -64,86 +64,43 @@ function parseWithLocale(
     return createReturn()
   }
 
-  // See if we have a single week day like "monday"
-  const nextTriggerWordMatch = onTriggerWordMatch(
-    DATE_NEXT_TRIGGER_WORDS,
-    input,
-    (matchIndex, matchText) => {
-      index = matchIndex
-      text = matchText
-      input = input.substring(index + text.length)
-    }
-  )
+  const phraseRegex =
+    `(` +
+    `(?<nextword>${DATE_NEXT_TRIGGER_WORDS.join('|')}) |` +
+    `(?<integer2>\\d+)(?:${INTEGER_SUFFIX}|\\.)? |` +
+    `(?<integerword2>${createWordRegex(INTEGER_WORDS)}) ` +
+    `)?` +
+    `(` +
+    `(?<weekday>${createWordRegex(DAY_OF_WEEK_WORDS)})|` +
+    `(?<month>${createWordRegex(MONTH_WORDS)})` +
+    `)` +
+    `(` +
+    ` (?<integer1>\\d+)(?:${INTEGER_SUFFIX}|\\.)?|` +
+    ` (?<integerword1>${createWordRegex(INTEGER_WORDS)})` +
+    `)?`
 
-  const onMatch = nextTriggerWordMatch ? onClosingWordMatch : onSingleWordMatch
+  const result = parsePhrase(input, phraseRegex, localeConfig)
 
-  // See if we have a single week day like "monday"
-  const weekDayMatch = onMatch(
-    DAY_OF_WEEK_WORDS,
-    input,
-    (matchIndex, matchText, value) => {
-      if (nextTriggerWordMatch) {
+  if (result) {
+    index = result.index
+    text = result.text
+
+    const { integer, month, weekday, next } = result
+
+    const dayOfMonth = integer || 1
+
+    if (weekday) {
+      if (next) {
         date = addDays(date, 1)
       }
-      index = index == null ? matchIndex : index
-      text = `${text}${matchText}`
-      date = getNextDayOccurrence(date, value)
+      date = getNextDayOccurrence(date, weekday)
     }
-  )
 
-  if (weekDayMatch) {
-    return createReturn()
-  }
-
-  // See if we have an enumaration like "2", "4.", "20th", etc.
-  let dayOfMonth: number | undefined
-  const match = input.match(
-    new RegExp(`${TRIGGER_BOUNDARY}(\\d+)(${INTEGER_SUFFIX}|\\.)? `, 'i')
-  )
-  if (match && match[0]) {
-    if (index == null) {
-      index = match.index || 0
+    if (month) {
+      date = setDate(date, dayOfMonth)
+      date = getNextMonthOccurrence(date, month - 1)
     }
-    if (match[0][0].match(/\s/)) {
-      index++
-      match[0] = match[0].slice(1)
-    }
-    dayOfMonth = Number(match[1])
-    text = `${text}${match[0]}`
-    input = input.slice(match[0].length)
-  }
 
-  // See if we have a single month like "june"
-  const monthMatch = onMatch(
-    MONTH_WORDS,
-    input,
-    (matchIndex, matchText, value) => {
-      index = index == null ? matchIndex : index
-      text = `${text}${matchText}`
-      date = setDate(date, dayOfMonth || 1)
-      date = getNextMonthOccurrence(date, value - 1)
-      input = input.slice(matchText.length)
-    }
-  )
-
-  // We have an enum plus a date (e.g. "3th june")
-  if (monthMatch && dayOfMonth != null) {
-    return createReturn()
-  }
-
-  // Look for an enum behind the month (e.g. "june 3th")
-  const postEnumMatch = input.match(
-    new RegExp(`^ (\\d+)(${INTEGER_SUFFIX}|\\.)?(?=$|\\s)`, 'i')
-  )
-  if (postEnumMatch && postEnumMatch[0]) {
-    dayOfMonth = Number(postEnumMatch[1])
-    text = `${text}${postEnumMatch[0]}`
-    date = setDate(date, dayOfMonth)
-    // TODO: substract years if needed
-    input = input.slice(postEnumMatch[0].length)
-  }
-
-  if (monthMatch) {
     return createReturn()
   }
 

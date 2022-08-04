@@ -115,13 +115,21 @@ function getHighestPrioGroupMatch(
   groups: Record<string, string>,
   groupName: string
 ): string | null {
-  return Object.entries(groups)
-    .filter(([key, value]) => key.startsWith(groupName) && value != null)
+  const groupRegex = new RegExp(`^${groupName}(\\d+)?$`)
+  const result = Object.entries(groups)
+    .filter(([key, value]) => key.match(groupRegex) && value != null)
     .sort(([keyA], [keyB]) => {
       const aOrder = parseInt(keyA.replace(groupName, ''))
       const bOrder = parseInt(keyB.replace(groupName, ''))
+      if (aOrder === NaN) {
+        return 1
+      }
+      if (bOrder === NaN) {
+        return -1
+      }
       return aOrder - bOrder
-    })[0]?.[1]
+    })
+  return result[0]?.[1]
 }
 
 export interface ParsePhraseResult {
@@ -134,6 +142,7 @@ export interface ParsePhraseResult {
   unit?: string
   weekday?: number
   month?: number
+  next?: boolean
 }
 
 export function parsePhrase(
@@ -147,6 +156,7 @@ export function parsePhrase(
   const regexString = `${TRIGGER_BOUNDARY}${phraseRegex}${CLOSING_BOUNDARY}`
   const regex = new RegExp(regexString, 'gi')
   const match = regex.exec(input) as RegExpExecArrayWithGroups<{
+    nextword?: string
     timepre?: string
     integer?: string
     integerword?: string
@@ -173,9 +183,13 @@ export function parsePhrase(
     result.text = result.text.slice(1)
   }
 
-  const { integer, integerword, unit, weekday, month } = match.groups
+  const { unit, weekday, month, nextword } = match.groups
+
+  result.next = nextword != null
 
   const time = getHighestPrioGroupMatch(match.groups, 'time')
+  const integer = getHighestPrioGroupMatch(match.groups, 'integer')
+  const integerword = getHighestPrioGroupMatch(match.groups, 'integerword')
 
   if (integer) {
     result.integer = parseInt(integer)
