@@ -13,9 +13,8 @@ import { locales, LocaleConfig } from './locales'
 import {
   onSingleWordMatch,
   getNextDayOccurrence,
-  TIME_REGEX,
-  createWordRegex,
   parsePhrase,
+  phraseBuilder,
 } from './utils'
 
 /**
@@ -41,16 +40,7 @@ function parseWithLocale(
   input: string,
   localeConfig: LocaleConfig
 ): ParseScheduleResult | null {
-  const {
-    DAY_OF_WEEK_WORDS,
-    MONTH_WORDS,
-    SCHEDULE_TRIGGER_WORDS,
-    SCHEDULE_SINGLE_WORDS,
-    INTEGER_WORDS,
-    UNIT_WORDS,
-    INTEGER_SUFFIX,
-    TIME_TRIGGER,
-  } = localeConfig
+  const { SCHEDULE_SINGLE_WORDS } = localeConfig
 
   let repeatFrequency: string | undefined
   let index = 0
@@ -93,20 +83,20 @@ function parseWithLocale(
     return createResult()
   }
 
-  // TODO: create helper for building a phrase
+  const pb = phraseBuilder(localeConfig)
   const phraseRegex =
-    `((?:(${TIME_TRIGGER}) )?(?<time1>${TIME_REGEX}) )?` +
-    `(?:${SCHEDULE_TRIGGER_WORDS.join('|')}) ` +
+    `(${pb.time(2)} )?` +
+    `${pb.scheduleTrigger()} ` +
     `(` +
-    `(?<integer>\\d+)(?:${INTEGER_SUFFIX}|\\.)? |` +
-    `(?<integerword>${createWordRegex(INTEGER_WORDS)}) ` +
+    `${pb.integer()} |` +
+    `${pb.integerWord()} ` +
     `)?` +
     `(` +
-    `(?<unit>${createWordRegex(UNIT_WORDS)})|` +
-    `(?<weekday>${createWordRegex(DAY_OF_WEEK_WORDS)})|` +
-    `(?<month>${createWordRegex(MONTH_WORDS)})` +
-    `)` +
-    `( (?:(${TIME_TRIGGER}) )?(?<time2>${TIME_REGEX}))?`
+    `${pb.unit()}|` +
+    `${pb.weekday()}|` +
+    `${pb.month()})` +
+    `( ${pb.time(1)})?`
+
   const result = parsePhrase(input, phraseRegex, localeConfig)
 
   if (result) {

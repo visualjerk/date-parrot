@@ -5,8 +5,8 @@ import {
   onSingleWordMatch,
   getNextDayOccurrence,
   getNextMonthOccurrence,
-  createWordRegex,
   parsePhrase,
+  phraseBuilder,
 } from './utils'
 
 export interface ParseDateResult {
@@ -22,14 +22,7 @@ function parseWithLocale(
   input: string,
   localeConfig: LocaleConfig
 ): ParseDateResult | null {
-  const {
-    SINGLE_DAY_WORDS,
-    DAY_OF_WEEK_WORDS,
-    DATE_NEXT_TRIGGER_WORDS,
-    MONTH_WORDS,
-    INTEGER_SUFFIX,
-    INTEGER_WORDS,
-  } = localeConfig
+  const { SINGLE_DAY_WORDS } = localeConfig
 
   let date = new Date()
   let index: number | undefined
@@ -64,19 +57,20 @@ function parseWithLocale(
     return createReturn()
   }
 
+  const pb = phraseBuilder(localeConfig)
   const phraseRegex =
     `(` +
-    `(?<nextword>${DATE_NEXT_TRIGGER_WORDS.join('|')}) |` +
-    `(?<integer2>\\d+)(?:${INTEGER_SUFFIX}|\\.)? |` +
-    `(?<integerword2>${createWordRegex(INTEGER_WORDS)}) ` +
+    `${pb.nextWord()} |` +
+    `${pb.integer(2)} |` +
+    `${pb.integerWord(2)} ` +
     `)?` +
     `(` +
-    `(?<weekday>${createWordRegex(DAY_OF_WEEK_WORDS)})|` +
-    `(?<month>${createWordRegex(MONTH_WORDS)})` +
+    `${pb.weekday()}|` +
+    `${pb.month()}` +
     `)` +
     `(` +
-    ` (?<integer1>\\d+)(?:${INTEGER_SUFFIX}|\\.)?|` +
-    ` (?<integerword1>${createWordRegex(INTEGER_WORDS)})` +
+    ` ${pb.integer(1)}|` +
+    ` ${pb.integerWord(1)}` +
     `)?`
 
   const result = parsePhrase(input, phraseRegex, localeConfig)

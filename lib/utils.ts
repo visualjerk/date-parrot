@@ -216,3 +216,52 @@ export function parsePhrase(
 
   return result
 }
+
+const createPhrasePattern =
+  (groupName: string, regex: string) => (index?: number) =>
+    regex.replace('<$1>', `<${groupName}${index ? index : ''}>`)
+
+export function phraseBuilder(localeConfig: LocaleConfig) {
+  const {
+    SCHEDULE_TRIGGER_WORDS,
+    DATE_NEXT_TRIGGER_WORDS,
+    DAY_OF_WEEK_WORDS,
+    MONTH_WORDS,
+    INTEGER_SUFFIX,
+    INTEGER_WORDS,
+    UNIT_WORDS,
+    TIME_TRIGGER,
+  } = localeConfig
+
+  return {
+    scheduleTrigger: createPhrasePattern(
+      'schedulword',
+      `(?:${SCHEDULE_TRIGGER_WORDS.join('|')})`
+    ),
+    nextWord: createPhrasePattern(
+      'nextword',
+      `(?<$1>${DATE_NEXT_TRIGGER_WORDS.join('|')})`
+    ),
+    integer: createPhrasePattern(
+      'integer',
+      `(?<$1>\\d+)(?:${INTEGER_SUFFIX}|\\.)?`
+    ),
+    integerWord: createPhrasePattern(
+      'integerword',
+      `(?<$1>${createWordRegex(INTEGER_WORDS)})`
+    ),
+    unit: createPhrasePattern('unit', `(?<$1>${createWordRegex(UNIT_WORDS)})`),
+    weekday: createPhrasePattern(
+      'weekday',
+      `(?<$1>${createWordRegex(DAY_OF_WEEK_WORDS)})`
+    ),
+    month: createPhrasePattern(
+      'month',
+      `(?<$1>${createWordRegex(MONTH_WORDS)})`
+    ),
+    time: createPhrasePattern(
+      'time',
+      `(?:(${TIME_TRIGGER}) )?(?<$1>${TIME_REGEX})`
+    ),
+  }
+}
