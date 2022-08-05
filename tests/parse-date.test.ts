@@ -73,7 +73,11 @@ describe('parseDate', () => {
     ['23nd february', new Date('2022-02-23 01:00:00')],
     ['28th february', new Date('2022-02-28 01:00:00')],
     ['february 3.', new Date('2023-02-03 01:00:00')],
-    // ['february 28th', new Date('2022-02-28 01:00:00')],
+    ['february 28th', new Date('2022-02-28 01:00:00')],
+    ['february 28th 10:00', new Date('2022-02-28 10:00:00')],
+    ['february 28th at 10:00', new Date('2022-02-28 10:00:00')],
+    ['10:00 february 28th', new Date('2022-02-28 10:00:00')],
+    ['at 10:00 february 28th', new Date('2022-02-28 10:00:00')],
   ]
   expectTestCasesToSucceed(TEST_CASES)
 

@@ -1,4 +1,11 @@
-import { addDays, formatISO, setDate } from 'date-fns'
+import {
+  addDays,
+  formatISO,
+  setDate,
+  setHours,
+  setMinutes,
+  setSeconds,
+} from 'date-fns'
 import { LocaleConfig, locales } from './locales'
 import { ParserConfig } from './types'
 import {
@@ -59,6 +66,7 @@ function parseWithLocale(
 
   const pb = phraseBuilder(localeConfig)
   const phraseRegex =
+    `(${pb.time(2)} )?` +
     `(` +
     `${pb.nextWord()} |` +
     `${pb.integer(2)} |` +
@@ -71,7 +79,8 @@ function parseWithLocale(
     `(` +
     ` ${pb.integer(1)}|` +
     ` ${pb.integerWord(1)}` +
-    `)?`
+    `)?` +
+    `( ${pb.time(1)})?`
 
   const result = parsePhrase(input, phraseRegex, localeConfig)
 
@@ -79,9 +88,15 @@ function parseWithLocale(
     index = result.index
     text = result.text
 
-    const { integer, month, weekday, next } = result
+    const { integer, month, weekday, next, hours, minutes, seconds } = result
 
     const dayOfMonth = integer || 1
+
+    if (hours != null && minutes != null && seconds != null) {
+      date = setHours(date, hours)
+      date = setMinutes(date, minutes)
+      date = setSeconds(date, seconds)
+    }
 
     if (weekday) {
       if (next) {
