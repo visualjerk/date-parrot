@@ -121,10 +121,10 @@ function getHighestPrioGroupMatch(
     .sort(([keyA], [keyB]) => {
       const aOrder = parseInt(keyA.replace(groupName, ''))
       const bOrder = parseInt(keyB.replace(groupName, ''))
-      if (aOrder === NaN) {
+      if (isNaN(aOrder)) {
         return 1
       }
-      if (bOrder === NaN) {
+      if (isNaN(bOrder)) {
         return -1
       }
       return aOrder - bOrder
