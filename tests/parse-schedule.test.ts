@@ -1,5 +1,12 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
-import { nextMonday, setMonth, setDate, addYears, formatISO } from 'date-fns'
+import {
+  nextMonday,
+  setMonth,
+  setDate,
+  addYears,
+  formatISO,
+  nextSunday,
+} from 'date-fns'
 import {
   DayOfWeek,
   Month,
@@ -102,6 +109,7 @@ describe('parseSchedule', () => {
     ['every 2 friday', 'P2W', TODAY, { byDay: DayOfWeek.Friday }],
     ['every 2. friday', 'P2W', TODAY, { byDay: DayOfWeek.Friday }],
     ['every monday', 'P1W', nextMonday(TODAY), { byDay: DayOfWeek.Monday }],
+    ['Every Sunday', 'P1W', nextSunday(TODAY), { byDay: DayOfWeek.Sunday }],
     [
       'every june',
       'P1Y',

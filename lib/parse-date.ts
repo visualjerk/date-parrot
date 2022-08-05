@@ -98,14 +98,14 @@ function parseWithLocale(
       date = setSeconds(date, seconds)
     }
 
-    if (weekday) {
+    if (weekday != null) {
       if (next) {
         date = addDays(date, 1)
       }
       date = getNextDayOccurrence(date, weekday)
     }
 
-    if (month) {
+    if (month != null) {
       date = setDate(date, dayOfMonth)
       date = getNextMonthOccurrence(date, month - 1)
     }

@@ -115,11 +115,11 @@ function parseWithLocale(
 
     if (unit) {
       repeatFrequency = `P${ordinal}${unit}`
-    } else if (weekday) {
+    } else if (weekday != null) {
       repeatFrequency = `P${ordinal}W`
       byDay = weekday
       startDate = getNextDayOccurrence(startDate, byDay)
-    } else if (month) {
+    } else if (month != null) {
       repeatFrequency = `P1Y`
       byMonth = month
       startDate = setDate(setMonth(startDate, byMonth - 1), ordinal)
