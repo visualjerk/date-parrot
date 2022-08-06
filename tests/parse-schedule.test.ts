@@ -1,12 +1,5 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
-import {
-  nextMonday,
-  setMonth,
-  setDate,
-  addYears,
-  formatISO,
-  nextSunday,
-} from 'date-fns'
+import { nextMonday, setMonth, addYears, formatISO, nextSunday } from 'date-fns'
 import {
   DayOfWeek,
   Month,
@@ -29,7 +22,7 @@ type TestCase = [
   number?
 ]
 
-const TODAY = new Date('2022-02-04')
+const TODAY = new Date('2022-02-04:01:00:00')
 
 function createParseResult(
   input: string | null,
@@ -110,50 +103,59 @@ describe('parseSchedule', () => {
     ['every 2. friday', 'P2W', TODAY, { byDay: DayOfWeek.Friday }],
     ['every monday', 'P1W', nextMonday(TODAY), { byDay: DayOfWeek.Monday }],
     ['Every Sunday', 'P1W', nextSunday(TODAY), { byDay: DayOfWeek.Sunday }],
-    [
-      'every june',
-      'P1Y',
-      setDate(setMonth(TODAY, 5), 1),
-      { byMonth: Month.June },
-    ],
+    ['every june', 'P1Y', setMonth(TODAY, 5), { byMonth: Month.June }],
     [
       'every 2nd june',
       'P1Y',
       new Date('2022-06-02:01:00:00'),
-      { byMonth: Month.June },
+      { byMonth: Month.June, byMonthDay: 2 },
     ],
     [
       'every january',
       'P1Y',
-      addYears(setDate(setMonth(TODAY, 0), 1), 1),
+      addYears(setMonth(TODAY, 0), 1),
       { byMonth: Month.January },
     ],
     [
       'every 2nd june 10:00',
       'P1Y',
       new Date('2022-06-02:10:00:00'),
-      { byMonth: Month.June },
+      { byMonth: Month.June, byMonthDay: 2, byTime: '10:00:00+01:00' },
     ],
     [
       'every 2nd june at 10:00',
       'P1Y',
       new Date('2022-06-02:10:00:00'),
-      { byMonth: Month.June },
+      { byMonth: Month.June, byMonthDay: 2, byTime: '10:00:00+01:00' },
     ],
     [
       '10:00 every 2nd june',
       'P1Y',
       new Date('2022-06-02:10:00:00'),
-      { byMonth: Month.June },
+      { byMonth: Month.June, byMonthDay: 2, byTime: '10:00:00+01:00' },
     ],
     [
       'at 10:00 every 2nd june',
       'P1Y',
       new Date('2022-06-02:10:00:00'),
-      { byMonth: Month.June },
+      { byMonth: Month.June, byMonthDay: 2, byTime: '10:00:00+01:00' },
     ],
-    ['every 2nd day at 10:00', 'P2D', new Date('2022-02-04:10:00:00')],
-    ['at 14:21 every 2nd week', 'P2W', new Date('2022-02-04:14:21:00')],
+    [
+      'every 2nd day at 10:00',
+      'P2D',
+      new Date('2022-02-04:10:00:00'),
+      {
+        byTime: '10:00:00+01:00',
+      },
+    ],
+    [
+      'at 14:21 every 2nd week',
+      'P2W',
+      new Date('2022-02-04:14:21:00'),
+      {
+        byTime: '14:21:00+01:00',
+      },
+    ],
     [
       'at 25:00 every 2nd week',
       'P2W',

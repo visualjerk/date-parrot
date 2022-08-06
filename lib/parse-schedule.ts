@@ -26,6 +26,7 @@ export interface ParseScheduleResult {
     byMonth?: Month
     byMonthDay?: number
     byMonthWeek?: number
+    byTime?: string
     repeatFrequency: string
     startDate: string
   }
@@ -47,6 +48,8 @@ function parseWithLocale(
   let text = ''
   let byDay: DayOfWeek | undefined
   let byMonth: Month | undefined
+  let byMonthDay: number | undefined
+  let byTime: string | undefined
   let startDate = new Date()
 
   function createResult(): ParseScheduleResult | null {
@@ -59,6 +62,8 @@ function parseWithLocale(
         startDate: formatISO(startDate),
         byDay,
         byMonth,
+        byMonthDay,
+        byTime,
       },
       match: {
         index,
@@ -109,20 +114,26 @@ function parseWithLocale(
       startDate = setHours(startDate, hours)
       startDate = setMinutes(startDate, minutes)
       startDate = setSeconds(startDate, seconds)
+      byTime = formatISO(startDate, { representation: 'time' })
     }
 
-    const ordinal = integer || 1
+    const frequency = integer || 1
 
     if (unit) {
-      repeatFrequency = `P${ordinal}${unit}`
+      repeatFrequency = `P${frequency}${unit}`
     } else if (weekday != null) {
-      repeatFrequency = `P${ordinal}W`
+      repeatFrequency = `P${frequency}W`
       byDay = weekday
       startDate = getNextDayOccurrence(startDate, byDay)
     } else if (month != null) {
       repeatFrequency = `P1Y`
       byMonth = month
-      startDate = setDate(setMonth(startDate, byMonth - 1), ordinal)
+      startDate = setMonth(startDate, byMonth - 1)
+      if (integer != null) {
+        startDate = setDate(startDate, integer)
+        byMonthDay = integer
+      }
+
       if (isPast(startDate)) {
         startDate = addYears(startDate, 1)
       }
