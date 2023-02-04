@@ -96,4 +96,4 @@ parseDate('lass uns morgen ausgehen', { locales: ['de'] })
 // }
 ```
 
-Parrot icon is provided by the awesome [AnimalJamSrchives](https://www.animaljamarchives.com/).
+Parrot icon is provided by the awesome [AnimalJamArchives](https://www.animaljamarchives.com/).
